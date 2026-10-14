@@ -50,10 +50,10 @@ Legend: `[x]` done in Figma · `[~]` partly done (the rest needs a manual step) 
 ### 3. Page instances override the components silently
 - [x] **Hero at 393:** an extra padding-top and gap bound to `section/padding-y` were set only on the instance. The override is removed (unbound, set to 0). The hero is now 400 tall and the frame reflowed.
 - [x] **Code-snippet-preview:** height overridden to 580 on the page. Decision: 580 is correct at every size. The Size=393 variant (2614:18657) was resized from 528 to 580 (by hand), so components and page now agree. The code already uses 580.
-- [ ] **Instance text left as placeholders** (blocked by the font, see below):
-  - "Primary Button" → "Join us on Slack" on the 6 Slack-band instances.
-  - Trailing "\n" on the Card-AI question at 768 and 393.
-  - Trailing space on the headless-cms paragraph in all 6 frames.
+- [x] **Instance text left as placeholders** (fixed by hand):
+  - The Slack-band button reads "Join us on Slack" in all 6 frames.
+  - The trailing "\n" on the Card-AI question at 768 and 393 is gone.
+  - The trailing space on the headless-cms paragraph is gone in all 6 frames.
 - **Suggestion:** if an override is intended, move it into the component and describe it; otherwise reset it.
 
 ### 4. Tokens bypassed in the file *(on hold)*
@@ -89,10 +89,7 @@ These raw values were mapped to theme tokens in code so they re-theme.
 - [ ] The "Feature Request" pill in a community card is visible, although the note says "cta-buttons are hidden".
 
 ### Manual steps (blocked for the agent)
-- **The trial font can't be loaded by the plugin.** "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, and Figma refuses to edit a text layer whose font it can't load. That blocks:
-  - the Slack button label,
-  - the trailing-whitespace trims.
-  - Either edit them by hand, or upload the font as a team font and the agent can redo them.
+- None open. Note for next time: "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, so an agent can't edit text in this file. Upload the font as a team font to allow it.
 
 ### Code follow-ups (when we update the site)
 - Hero: remove the `<768` padding/gap rule, end the typewriter on "[••]" (it currently switches to "[•ᴥ•]"), and use the new subheadline copy.
