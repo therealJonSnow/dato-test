@@ -39,6 +39,9 @@ const { label, href } = Astro.props;
     font: 500 var(--type-h1)/1 var(--font-sans);
     letter-spacing: -0.04em;
   }
+  /* Figma's label is a fixed 728-wide single line; at 393 it slightly overhangs the left padding.
+     Keep it on one line from ~380px up, let it wrap on narrower phones. */
+  @media (min-width: 380px) { .ccs__label { white-space: nowrap; } }
   @media (min-width: 768px) {
     .ccs { padding-inline: var(--space-2xs); }
   }
