@@ -1,0 +1,61 @@
+@import '@fontsource/inter-tight/400.css';
+@import '@fontsource/inter-tight/500.css';
+@import '@fontsource/dm-mono/500.css';
+@import './tokens/primitives.css';
+@import './tokens/sizing.css';
+@import './tokens/radius.css';
+@import './tokens/theme.css';
+@import './typography.css';
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  font-family: var(--font-sans);
+  background: var(--surface-default);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  overflow-x: clip;
+}
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; text-decoration: none; }
+img, svg, video { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+
+/* Every section paints its themed default surface unless it says otherwise */
+[data-theme] { color: var(--text-primary); }
+
+.visually-hidden {
+  position: absolute !important; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* Centred content column used by most sections (header-inner etc.: max 1160) */
+.container {
+  width: 100%;
+  max-width: calc(1160px + 2 * var(--section-padding-x));
+  margin-inline: auto;
+  padding-inline: var(--section-padding-x);
+}
+
+/* Placeholder for image/video assets that could not be exported (figma.com blocked) */
+.asset-placeholder {
+  display: grid; place-items: center;
+  background: repeating-linear-gradient(45deg, var(--surface-accent-subtle) 0 10px, transparent 10px 20px), var(--surface-subtle);
+  color: var(--text-muted);
+  font: 500 12px/1.2 var(--font-mono);
+  text-align: center;
+  padding: 8px;
+  overflow: hidden;
+}
+
+/* Typewriter layers (src/scripts/typewriter.ts) */
+.tw { display: grid; }
+.tw > .tw__final, .tw > .tw__anim { grid-area: 1 / 1; }
+.tw__anim { visibility: hidden; }
+.tw--playing > .tw__final { opacity: 0; }
+.tw--playing > .tw__anim { visibility: visible; }
+.tw--done > .tw__anim { display: none; }
+.tw__cursor { white-space: pre; }
+.tw__anim { white-space: pre-wrap; }

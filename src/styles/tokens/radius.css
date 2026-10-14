@@ -1,0 +1,7 @@
+/* Figma collection: Radius */
+:root {
+  --radius-md: 8px;   /* Cards and panels */
+  --radius-lg: 12px;  /* Code blocks and larger panels */
+  --radius-full: 9999px; /* Buttons, tags, avatars, tabs */
+
+}

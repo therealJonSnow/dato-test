@@ -1,0 +1,110 @@
+---
+/**
+ * Figma: button (1477:56042)
+ * Colour comes from the Theme collection and is inherited from the parent section's
+ * data-theme. Pass `theme` only for a deliberate exception.
+ *
+ * appearance = "button colour on background":
+ *  deep-on-white  – deep fill, near-white text (white/tint backgrounds). Hover: accent fill, deep text.
+ *  light-on-white – accent fill, deep text (white/tint backgrounds).     Hover: deep fill, accent text.
+ *  deep-on-light  – deep fill, accent text (accent backgrounds).         Hover: near-white fill, deep text.
+ *  light-on-deep  – accent fill, deep text (dark backgrounds).           Hover: near-white fill, deep text.
+ * variant = primary (solid) | secondary (soft, tinted). Figma calls these Primary/Secondary,
+ * the description calls them solid/soft – same thing.
+ * States: default, :hover, :active (pressed), disabled.
+ */
+type Appearance = 'deep-on-white' | 'light-on-white' | 'deep-on-light' | 'light-on-deep';
+interface Props {
+  href?: string;
+  appearance?: Appearance;
+  variant?: 'primary' | 'secondary';
+  arrow?: boolean;
+  leading?: 'none' | 'userpic' | 'logos';
+  theme?: 'default' | 'orange' | 'green' | 'purple' | 'blue' | 'pink';
+  disabled?: boolean;
+  class?: string;
+  [key: string]: unknown;
+}
+const {
+  href,
+  appearance = 'light-on-white',
+  variant = 'primary',
+  arrow = false,
+  leading = 'none',
+  theme,
+  disabled = false,
+  class: className,
+  ...rest
+} = Astro.props;
+const Tag = href && !disabled ? 'a' : 'button';
+---
+<Tag
+  class:list={['btn', `btn--${appearance}`, `btn--${variant}`, leading !== 'none' && `btn--leading`, className]}
+  href={Tag === 'a' ? href : undefined}
+  type={Tag === 'button' ? 'button' : undefined}
+  disabled={Tag === 'button' && disabled ? true : undefined}
+  aria-disabled={disabled ? 'true' : undefined}
+  data-theme={theme}
+  {...rest}
+>
+  {leading === 'userpic' && <span class="btn__userpic" aria-hidden="true"><slot name="leading" /></span>}
+  {leading === 'logos' && <span class="btn__logos" aria-hidden="true"><slot name="leading" /></span>}
+  <span class="btn__label t-subtitle"><slot />{arrow && <span class="btn__arrow" aria-hidden="true">→</span>}</span>
+</Tag>
+
+<style>
+  .btn {
+    --btn-bg: var(--surface-accent);
+    --btn-fg: var(--text-primary);
+    --btn-bg-hover: var(--surface-inverse);
+    --btn-fg-hover: var(--text-on-inverse);
+    --btn-bg-pressed: var(--surface-inverse-pressed);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-3xs);
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    background: var(--btn-bg);
+    color: var(--btn-fg);
+    white-space: nowrap;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+  .btn--leading { gap: var(--space-2xs); padding: var(--space-2xs) var(--space-sm) var(--space-2xs) var(--space-2xs); }
+  .btn__label { display: inline-flex; gap: var(--space-3xs); align-items: center; }
+  .btn__userpic { display: block; width: 20px; height: 20px; border-radius: 50%; overflow: hidden; background: var(--surface-subtle); }
+  .btn__logos { display: inline-flex; align-items: center; }
+
+  /* Appearance × variant → default / hover / pressed fills (from the Figma variant bindings) */
+  .btn--deep-on-white.btn--primary { --btn-bg: var(--surface-inverse); --btn-fg: var(--text-on-inverse-strong); }
+  .btn--deep-on-white { --btn-bg-hover: var(--surface-accent); --btn-fg-hover: var(--text-primary); --btn-bg-pressed: var(--surface-accent-pressed); }
+  .btn--deep-on-white.btn--secondary { --btn-bg: var(--surface-subtle); --btn-fg: var(--text-primary); }
+
+  .btn--light-on-white.btn--primary { --btn-bg: var(--surface-accent); --btn-fg: var(--text-primary); }
+  .btn--light-on-white.btn--secondary { --btn-bg: var(--surface-accent-subtle); --btn-fg: var(--text-primary); }
+  .btn--light-on-white { --btn-bg-hover: var(--surface-inverse); --btn-fg-hover: var(--text-on-inverse); --btn-bg-pressed: var(--surface-inverse-pressed); }
+
+  .btn--deep-on-light.btn--primary { --btn-bg: var(--surface-inverse); --btn-fg: var(--text-on-inverse); }
+  .btn--deep-on-light.btn--secondary { --btn-bg: var(--surface-subtle); --btn-fg: var(--text-primary); }
+  .btn--deep-on-light { --btn-bg-hover: var(--surface-default); --btn-fg-hover: var(--text-primary); --btn-bg-pressed: var(--surface-default-pressed); }
+
+  .btn--light-on-deep.btn--primary { --btn-bg: var(--surface-accent); --btn-fg: var(--text-primary); }
+  .btn--light-on-deep.btn--secondary { --btn-bg: var(--surface-accent-subtle); --btn-fg: var(--text-on-inverse); }
+  .btn--light-on-deep { --btn-bg-hover: var(--surface-default); --btn-fg-hover: var(--text-primary); --btn-bg-pressed: var(--surface-default-pressed); }
+
+  @media (hover: hover) {
+    .btn:hover { background: var(--btn-bg-hover); color: var(--btn-fg-hover); }
+  }
+  .btn:active { background: var(--btn-bg-pressed); color: var(--btn-fg-hover); }
+  .btn:focus-visible { outline: 2px solid var(--border-strong); outline-offset: 2px; }
+
+  .btn[aria-disabled='true'],
+  .btn[aria-disabled='true']:hover,
+  .btn[aria-disabled='true']:active {
+    background: var(--surface-subtle);
+    color: var(--text-subtle);
+    cursor: not-allowed;
+  }
+  .btn--light-on-white[aria-disabled='true'] { background: var(--surface-accent-subtle); }
+</style>

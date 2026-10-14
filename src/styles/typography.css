@@ -1,0 +1,49 @@
+/*
+ * Figma text styles. Font sizes are bound to the Sizing collection (sizing.css),
+ * so every class follows the breakpoint automatically.
+ *
+ * ABC Oracle is a commercial font: drop ABCOracle-Regular.woff2 / ABCOracle-Medium.woff2
+ * into public/fonts/ and they are picked up. Until then Inter Tight is the fallback.
+ */
+@font-face {
+  font-family: 'ABC Oracle';
+  src: url('/fonts/ABCOracle-Regular.woff2') format('woff2');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+@font-face {
+  font-family: 'ABC Oracle';
+  src: url('/fonts/ABCOracle-Medium.woff2') format('woff2');
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+:root {
+  --font-sans: 'ABC Oracle', 'Inter Tight', system-ui, sans-serif;
+  --font-mono: 'DM Mono', ui-monospace, monospace;
+}
+
+/* Oracle/Display — page headline in heroes, once per page */
+.t-display { font: 500 var(--type-display)/1 var(--font-sans); letter-spacing: -0.05em; }
+/* Oracle/H1 — section headlines (element chosen by page structure) */
+.t-h1 { font: 500 var(--type-h1)/1 var(--font-sans); letter-spacing: -0.04em; }
+/* Oracle/H2 — sub-headlines and card titles */
+.t-h2 { font: 500 var(--type-h2)/1.1 var(--font-sans); letter-spacing: -0.02em; }
+/* Oracle/Body — paragraphs and descriptions */
+.t-body { font: 400 var(--type-body)/1.3 var(--font-sans); letter-spacing: -0.01em; }
+/* Oracle/Body Medium — emphasised body text */
+.t-body-medium { font: 500 var(--type-body)/1.3 var(--font-sans); letter-spacing: -0.01em; }
+/* Oracle/long-term body — long-form reading text */
+.t-body-long { font: 400 var(--type-body)/1.5 var(--font-sans); letter-spacing: -0.01em; }
+/* Oracle/Subtitle Medium — buttons, navigation, links, tags, dates */
+.t-subtitle { font: 500 var(--type-subtitle)/1 var(--font-sans); letter-spacing: -0.01em; }
+/* Oracle/Subtitle Regular — footer group titles, secondary metadata */
+.t-subtitle-regular { font: 400 var(--type-subtitle)/1 var(--font-sans); letter-spacing: -0.01em; }
+/* Oracle/Caption — legal small print (fixed 12px line height in Figma) */
+.t-caption { font: 500 var(--type-caption)/12px var(--font-sans); letter-spacing: -0.05em; }
+/* Mono/Code — code snippets and technical strings */
+.t-code { font: 500 var(--type-code)/1.4 var(--font-mono); }
+/* Mono/Code Small — code in snippet previews */
+.t-code-small { font: 500 var(--type-code-small)/1.86 var(--font-mono); }
