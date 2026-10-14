@@ -1,0 +1,92 @@
+---
+/**
+ * Figma: Logos-line (1629:21027) — List=Clients | AI-providers.
+ * Rule: "Logos should move with 32 px/s speed. Infinite loop, no breakage."
+ *  - The logo set is rendered twice; the track moves by exactly one set width, so the loop
+ *    is seamless. JS measures the set width and sets the duration so speed = 32px/s at any size.
+ *  - Reduced motion: the marquee stands still.
+ * Logos: 40px tall, gap space/2xl (60).
+ */
+import Polestar from '../../assets/svg/logos/polestar.svg';
+import Netflix from '../../assets/svg/logos/netflix.svg';
+import Verizon from '../../assets/svg/logos/verizon.svg';
+import Vercel from '../../assets/svg/logos/vercel.svg';
+import DeutscheTelekom from '../../assets/svg/logos/deutsche-telekom.svg';
+import Mit from '../../assets/svg/logos/mit.svg';
+import Arduino from '../../assets/svg/logos/arduino.svg';
+
+interface Props {
+  list?: 'clients' | 'ai-providers';
+  label?: string;
+}
+const { list = 'clients', label = 'Trusted by' } = Astro.props;
+
+// Only the Clients list is used on the homepage; AI-providers would be added here.
+const lists = {
+  clients: [
+    { name: 'Polestar', Logo: Polestar },
+    { name: 'Netflix', Logo: Netflix },
+    { name: 'Verizon', Logo: Verizon },
+    { name: 'Vercel', Logo: Vercel },
+    { name: 'Deutsche Telekom', Logo: DeutscheTelekom },
+    { name: 'MIT', Logo: Mit },
+    { name: 'Arduino', Logo: Arduino },
+  ],
+  'ai-providers': [],
+};
+const logos = lists[list];
+---
+<div class="logos-line" data-logos-line>
+  <p class="visually-hidden">{label}: {logos.map((l) => l.name).join(', ')}</p>
+  <div class="logos-line__track" aria-hidden="true">
+    {[0, 1].map(() => (
+      <ul class="logos-line__set">
+        {logos.map(({ Logo }) => (
+          <li class="logos-line__item"><Logo /></li>
+        ))}
+      </ul>
+    ))}
+  </div>
+</div>
+
+<style>
+  .logos-line {
+    width: 100%;
+    overflow: hidden;
+    color: var(--text-primary);
+  }
+  .logos-line__track {
+    display: flex;
+    width: max-content;
+    animation: logos-marquee var(--marquee-duration, 40s) linear infinite;
+  }
+  .logos-line__set {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xl);
+    padding-right: var(--space-2xl); /* keeps the gap at the seam between the two sets */
+  }
+  .logos-line__item { height: 40px; display: flex; align-items: center; flex-shrink: 0; }
+  .logos-line__item :global(svg) { height: 40px; width: auto; }
+
+  @keyframes logos-marquee {
+    to { transform: translateX(-50%); }
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .logos-line__track { animation: none; }
+  }
+</style>
+
+<script>
+  const SPEED = 32; // px per second, from the Figma note
+  const lines = document.querySelectorAll<HTMLElement>('[data-logos-line]');
+  const update = (line: HTMLElement) => {
+    const set = line.querySelector<HTMLElement>('.logos-line__set');
+    const track = line.querySelector<HTMLElement>('.logos-line__track');
+    if (set && track) track.style.setProperty('--marquee-duration', `${set.offsetWidth / SPEED}s`);
+  };
+  lines.forEach((line) => {
+    update(line);
+    new ResizeObserver(() => update(line)).observe(line);
+  });
+</script>

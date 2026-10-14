@@ -1,0 +1,189 @@
+---
+/**
+ * Figma: Hero (2939:56515) — "the one hero for every page".
+ * Homepage use: alignment=left, label off, logos on (Clients), primary button
+ * light-on-white, secondary deep-on-white secondary, typewriter intro on.
+ *
+ * - Headline + Subheadline are ONE h1: headline text, then the subheadline in a muted span.
+ * - Spacing/type from the Sizing collection; colours from the Theme collection (data-theme on section).
+ * - Center: text max width 900, centred. Left: max width 1160, left-aligned in a centred column.
+ * - Show buttons / show secondary button / show logos / show label as props.
+ * - MOTION (homepage only, `typewriter`): see the timeline in the <script> below.
+ */
+import Button from '../ui/Button.astro';
+import LogosLine from '../hero/LogosLine.astro';
+
+interface ButtonProps {
+  label: string;
+  href: string;
+  appearance?: 'deep-on-white' | 'light-on-white' | 'deep-on-light' | 'light-on-deep';
+  variant?: 'primary' | 'secondary';
+  arrow?: boolean;
+}
+interface Props {
+  theme?: string;
+  alignment?: 'left' | 'center';
+  label?: string;
+  showLabel?: boolean;
+  headline: string;
+  subheadline?: string;
+  showButtons?: boolean;
+  showSecondaryButton?: boolean;
+  primaryButton?: ButtonProps;
+  secondaryButton?: ButtonProps;
+  showLogos?: boolean;
+  logoList?: 'clients' | 'ai-providers';
+  typewriter?: boolean;
+}
+const {
+  theme = 'orange',
+  alignment = 'left',
+  label,
+  showLabel = false,
+  headline,
+  subheadline,
+  showButtons = true,
+  showSecondaryButton = true,
+  primaryButton,
+  secondaryButton,
+  showLogos = false,
+  logoList = 'clients',
+  typewriter = false,
+} = Astro.props;
+---
+<section class:list={['hero', `hero--${alignment}`, showLogos && 'hero--logos']} data-theme={theme} data-hero={typewriter ? 'typewriter' : undefined}>
+  <div class="hero__wrapper">
+    <div class="hero__inner">
+      <div class="hero__text">
+        {showLabel && label && <p class="hero__label t-subtitle">{label}</p>}
+        <h1 class="hero__headline t-h1 tw">
+          <span class="tw__final">
+            <span class="hero__headline-main">{headline}</span>
+            {subheadline && <span class="hero__headline-sub">{subheadline}</span>}
+          </span>
+          {typewriter && <span class="tw__anim" aria-hidden="true"><span class="tw__cursor">•</span></span>}
+        </h1>
+      </div>
+      {showButtons && primaryButton && (
+        <div class="hero__buttons">
+          <Button href={primaryButton.href} appearance={primaryButton.appearance ?? 'light-on-white'} variant={primaryButton.variant ?? 'primary'} arrow={primaryButton.arrow}>{primaryButton.label}</Button>
+          {showSecondaryButton && secondaryButton && (
+            <Button href={secondaryButton.href} appearance={secondaryButton.appearance ?? 'deep-on-white'} variant={secondaryButton.variant ?? 'secondary'} arrow={secondaryButton.arrow}>{secondaryButton.label}</Button>
+          )}
+        </div>
+      )}
+    </div>
+  </div>
+  {showLogos && (
+    <div class="hero__logos">
+      <LogosLine list={logoList} />
+    </div>
+  )}
+  {typewriter && (
+    <script is:inline>
+      // Runs before first paint: reserve the final text space but show only the cursor, hide the buttons.
+      (function () {
+        if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+        var s = document.currentScript.closest('[data-hero]');
+        s.classList.add('hero--intro');
+        s.querySelector('.tw').classList.add('tw--playing');
+      })();
+    </script>
+  )}
+</section>
+
+<style>
+  .hero {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    background: var(--surface-default);
+    color: var(--text-primary);
+  }
+  .hero__wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    padding: var(--section-padding-y) var(--section-padding-x-headlines);
+  }
+  .hero__inner {
+    width: 100%;
+    max-width: 1160px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+  .hero--center .hero__inner { max-width: 900px; align-items: center; text-align: center; }
+  .hero__text { display: flex; flex-direction: column; gap: var(--space-2xs); width: 100%; }
+  .hero__label { color: var(--text-muted); }
+  .hero__headline-main,
+  .hero__headline-sub { display: block; }
+  .hero__headline-main { color: var(--text-primary); }
+  .hero__headline-sub,
+  .hero__headline :global(.hero__anim-sub) { color: var(--text-muted); }
+  .hero__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .hero__logos { width: 100%; padding-bottom: var(--space-md); }
+
+  /* 393 frame: the page instance adds section/padding-y above the wrapper and between wrapper
+     and logos (instance override in Figma – see docs/AMBIGUITIES.md). */
+  @media (max-width: 767px) {
+    .hero { padding-top: var(--section-padding-y); gap: var(--section-padding-y); }
+  }
+
+  /* Intro: buttons hidden until the typewriter reveals them (opacity 0 → 1, 150ms) */
+  .hero__buttons { transition: opacity 150ms linear; }
+  .hero--intro .hero__buttons { opacity: 0; }
+  .hero--intro.hero--revealed .hero__buttons { opacity: 1; }
+</style>
+
+<script>
+  import { Typer, sleep, prefersReducedMotion } from '../../scripts/typewriter';
+
+  /*
+   * Hero typewriter — timeline from the Figma description (plays once on page load):
+   * 0.00s  final size reserved, only the cursor "•" visible, buttons hidden, marquee running
+   * 0.75s  cursor blinks like an eye: • → ~ → - → ᴗ → • (75ms per glyph, 0.3s)
+   * 1.15s  types the headline (text/primary) at ~80 chars/s
+   *        pause 0.5s, then types the subheadline (text/muted, cursor turns muted)
+   * +0.15s cursor duplicates "••", then "[" and "]" typed around → "[••]" (~50ms each)
+   * +0.3s  wink "[-•]" for 100ms → "[••]"
+   * +0.15s CTA buttons fade in (150ms). Final state = static design.
+   */
+  async function play(section: HTMLElement) {
+    const h1 = section.querySelector<HTMLElement>('.tw');
+    if (!h1) return;
+    const headline = h1.querySelector('.hero__headline-main')?.textContent?.trim() ?? '';
+    const sub = h1.querySelector('.hero__headline-sub')?.textContent?.trim() ?? '';
+    // The static subheadline ends in a face "[•ᴥ•]"; the face is drawn by the cursor, not typed.
+    const faceMatch = sub.match(/\s*(\[[^\]]+\])\s*$/);
+    const subText = faceMatch ? sub.slice(0, faceMatch.index) + ' ' : sub;
+    const finalFace = faceMatch ? faceMatch[1] : '[••]';
+
+    const typer = new Typer(h1).start();
+    typer.run('hero__anim-main');
+    await sleep(750);
+    await typer.cursorFrames(['~', '-', 'ᴗ', '•'], 75);
+    await sleep(100); // → 1.15s
+    await typer.type(headline, 80);
+    await sleep(500);
+    typer.run('hero__anim-sub');
+    typer.write('\n'); // the subheadline always starts on a new line in every frame
+    await typer.type(subText, 80);
+    await sleep(150);
+    await typer.cursorFrames(['••', '[••', '[••]'], 50);
+    await sleep(300);
+    await typer.cursorFrames(['[-•]'], 100);
+    typer.setCursor('[••]');
+    await sleep(150);
+    typer.setCursor(finalFace);
+    section.classList.add('hero--revealed');
+    await sleep(150);
+    typer.finish();
+  }
+
+  const section = document.querySelector<HTMLElement>('[data-hero="typewriter"]');
+  if (section && !prefersReducedMotion() && section.classList.contains('hero--intro')) play(section);
+</script>

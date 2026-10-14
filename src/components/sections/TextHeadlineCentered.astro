@@ -1,0 +1,96 @@
+---
+/**
+ * Figma: text-headline-centered (proposal) (3020:67057)
+ * Centred statement section: headline, optional subline, optional buttons.
+ * - background: dark → surface/inverse, text on-inverse / on-inverse-muted, buttons light-on-deep.
+ *               light → surface/accent, text primary / muted, buttons deep-on-light.
+ *   Actual colours come from the Theme mode (data-theme).
+ * - Headline: ONE h2 with two colour runs; the muted part is a span inside the h2.
+ * - Spacing: headline → subline space/2xs; text → buttons space/lg with subline, space/md without.
+ * - Text column max width 900, centred. No breakpoints (Sizing tokens only). Static.
+ */
+import Button from '../ui/Button.astro';
+
+interface ButtonProps {
+  label: string;
+  href: string;
+  variant?: 'primary' | 'secondary';
+  arrow?: boolean;
+}
+interface Props {
+  theme?: string;
+  background?: 'dark' | 'light';
+  headline: string;
+  headlineMuted?: string;
+  subline?: string;
+  showSubline?: boolean;
+  showButtons?: boolean;
+  showSecondaryButton?: boolean;
+  primaryButton?: ButtonProps;
+  secondaryButton?: ButtonProps;
+}
+const {
+  theme = 'default',
+  background = 'dark',
+  headline,
+  headlineMuted,
+  subline,
+  showSubline = false,
+  showButtons = true,
+  showSecondaryButton = false,
+  primaryButton,
+  secondaryButton,
+} = Astro.props;
+const appearance = background === 'dark' ? 'light-on-deep' : 'deep-on-light';
+const hasSubline = showSubline && !!subline;
+---
+<section class:list={['thc', `thc--${background}`, hasSubline && 'thc--subline']} data-theme={theme}>
+  <div class="thc__text">
+    <h2 class="thc__headline t-h1">
+      {headline}{headlineMuted && <> <span class="thc__muted">{headlineMuted}</span></>}
+    </h2>
+    {hasSubline && <p class="thc__subline t-body">{subline}</p>}
+  </div>
+  {showButtons && (primaryButton || secondaryButton) && (
+    <div class="thc__buttons">
+      {primaryButton && (
+        <Button href={primaryButton.href} appearance={appearance} variant={primaryButton.variant ?? 'primary'} arrow={primaryButton.arrow}>{primaryButton.label}</Button>
+      )}
+      {showSecondaryButton && secondaryButton && (
+        <Button href={secondaryButton.href} appearance={appearance} variant={secondaryButton.variant ?? 'secondary'} arrow={secondaryButton.arrow}>{secondaryButton.label}</Button>
+      )}
+    </div>
+  )}
+</section>
+
+<style>
+  .thc {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    padding: var(--section-padding-y) var(--section-padding-x-headlines);
+    text-align: center;
+  }
+  .thc--subline { gap: var(--space-lg); }
+  .thc--dark { background: var(--surface-inverse); }
+  .thc--light { background: var(--surface-accent); }
+
+  .thc__text {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2xs);
+  }
+  .thc--dark .thc__headline { color: var(--text-on-inverse); }
+  .thc--dark .thc__muted,
+  .thc--dark .thc__subline { color: var(--text-on-inverse-muted); }
+  .thc--light .thc__headline { color: var(--text-primary); }
+  .thc--light .thc__muted,
+  .thc--light .thc__subline { color: var(--text-muted); }
+
+  .thc__buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2xs); }
+</style>
