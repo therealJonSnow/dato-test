@@ -28,16 +28,15 @@ Legend: `[x]` done in Figma · `[~]` partly done (the rest needs a manual step) 
   - Make every logo its own flattened vector component, bound to a colour variable rather than hex.
 
 ### 2. Descriptions and the drawn design disagree
-- [~] **Hero** (2939:56515)
+- [x] **Hero** (2939:56515)
   - [x] The description said the secondary button was "Docs" while the instance said "Explore Pricing". The description now says "Explore Pricing" (Deep on White, Secondary, no arrow).
   - [x] The description put a typed line break only at ≥1152, but the design breaks the line at every width. The description now says the subheadline always starts on a new line.
-  - [~] The final face was "[••]" in the timeline but "[•ᴥ•]" in the design. The description now says the final state ends on "[••]".
-    - ⚠️ Manual step: change "[•ᴥ•]" to "[••]" in the Subheadline of the 6 homepage hero instances (blocked by the font, see below).
-- [~] **footer-animation-section** (3020:67323)
+  - [x] The final face was "[••]" in the timeline but "[•ᴥ•]" in the design. The description now says the final state ends on "[••]", and all 6 homepage instances now end in "[••]" (updated by hand).
+    - The subheadline copy also changed to: "The AI-agnostic CMS that's human on support and transparent in pricing [••]".
+- [x] **footer-animation-section** (3020:67323)
   - [x] The description said the band reads "Ciao [•ᴗ•]", but the component shows "Questions? Ask away [••]". The description now describes the real Footer-cta.
   - [x] The description said "blend Screen", but the fill is Normal. The blend reference is removed.
-  - [~] New: the face smiles on hover. Footer-cta (2377:38619) now has a description: on hover the arrow appears and "[••]" → "[•ᴗ•]", instantly.
-    - ⚠️ Manual step: the Hover variant text still reads "[••]"; change it to "[•ᴗ•]".
+  - [x] New: the face smiles on hover. Footer-cta (2377:38619) now has a description: on hover the arrow appears and "[••]" → "[•ᴗ•]", instantly. The Hover variant (2377:38711) now reads "Questions? Ask away [•ᴗ•]".
 - [x] **nav-dropdown** (2883:11102): the description said Subtitle-size links and a soft button, but the drawing uses H2 links and an underlined link. The description now matches the drawing, including the fixed 489 height.
 - [x] **developer-editor** (3026:11822): the description said the mock-up is 608×915, but the variants draw it at 648×974.7. The description now uses the variant sizes (648×974.7 at 768+, 333×500.9 at 393).
 - [x] **features-multi-section** (3007:14711): the description said to hide descriptions below 768, but the 393 frames show them. The description now says they always show, and the open question is removed.
@@ -92,15 +91,13 @@ These raw values were mapped to theme tokens in code so they re-theme.
 
 ### Manual steps (blocked for the agent)
 - **The trial font can't be loaded by the plugin.** "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, and Figma refuses to edit a text layer whose font it can't load. That blocks:
-  - the hero face,
   - the Slack button label,
-  - the Footer-cta hover smile,
   - the trailing-whitespace trims.
   - Either edit them by hand, or upload the font as a team font and the agent can redo them.
 - **Code-snippet-preview 393 height:** see section 3.
 
 ### Code follow-ups (when we update the site)
-- Hero: remove the `<768` padding/gap rule, and end the typewriter on "[••]" (it currently switches to "[•ᴥ•]").
+- Hero: remove the `<768` padding/gap rule, end the typewriter on "[••]" (it currently switches to "[•ᴥ•]"), and use the new subheadline copy.
 - Footer-cta: add the hover smile ("[••]" → "[•ᴗ•]").
 - Code snippet: use 528 at 393 once Figma is fixed (the code currently uses `min-height: 580px`).
 
