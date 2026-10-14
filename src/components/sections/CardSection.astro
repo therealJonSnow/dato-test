@@ -1,0 +1,98 @@
+---
+/**
+ * Figma: card-section (layout proposal) — component set 3001:14482
+ *   Breakpoint=1152+ 3001:14432 (cards side by side, 514 tall) · Breakpoint=<1152 3001:14463 (stacked, square)
+ *   Page instances (Theme=Blue): 1320 3029:66063 · 768 3030:20065 · 393 3030:21239 · 1152 3030:18871 · 1920 3030:17671
+ *
+ * Rules implemented:
+ *  - Breakpoint is a media query at 1152px, not a prop. Spacing/type from the Sizing tokens only:
+ *    padding section/padding-y × section/padding-x, main gap section/padding-x, card gap space/md.
+ *  - Background surface/accent of the section theme (blue). Heading + subline are Oracle/H1 bound to the
+ *    primitives Purple Deep/800 and /700 in Figma (kept as-is; see docs/notes/ai-community.md).
+ *  - Heading is static. Cards: Card-AI typewriter — card 2 starts 1.2s after card 1 ([data-card-ai-row]).
+ *  - COPY: the subline differs per layout in Figma only by a trailing space ("…home. " at 1152+, "…home." below).
+ *    Rendered once; trailing space is irrelevant in HTML.
+ */
+import CardAI from '../cards/CardAI.astro';
+
+interface Props {
+  theme?: string;
+  headline?: string;
+  subline?: string;
+  connectHref?: string;
+  teachHref?: string;
+}
+const {
+  theme = 'blue',
+  headline = 'Bring your AI [•ᴥ•]',
+  subline = 'Use AI your way, Dato will make it feel right at home.',
+  connectHref,
+  teachHref,
+} = Astro.props;
+---
+<section class="card-section" data-theme={theme} aria-labelledby="card-section-title">
+  <div class="card-section__text t-h1">
+    <h2 id="card-section-title" class="card-section__headline">{headline}</h2>
+    <p class="card-section__subline">{subline}</p>
+  </div>
+  <div class="card-section__cards" data-card-ai-row>
+    <CardAI
+      title="Connect your AI"
+      href={connectHref}
+      content={{
+        kind: 'connect',
+        question: 'How many pages are still missing SEO descriptions?',
+        answer: 'Claude: 8 pages are missing them ',
+        aiNames: ['Claude', 'Chat-GPT', 'Gemini'],
+        face: '[>.<]',
+      }}
+    />
+    <CardAI
+      title="Teach it DatoCMS"
+      href={teachHref}
+      content={{
+        kind: 'teach',
+        command: 'npx skills add datocms',
+        pathHead: '~/.',
+        pathTail: 'claude/skills/',
+        items: ['datocms-setup/', 'datocms-cda/', 'datocms-cli/'],
+      }}
+    />
+  </div>
+</section>
+
+<style>
+  .card-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--section-padding-x);
+    padding: var(--section-padding-y) var(--section-padding-x);
+    background: var(--surface-accent);
+  }
+  .card-section__text,
+  .card-section__cards {
+    width: 100%;
+    max-width: 1160px;
+  }
+  .card-section__headline,
+  .card-section__subline {
+    max-width: 700px;
+    font: inherit;
+    letter-spacing: inherit;
+  }
+  .card-section__headline { color: var(--color-purple-deep-800); }
+  .card-section__subline { color: var(--color-purple-deep-700); }
+
+  .card-section__cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+  }
+  .card-section__cards > :global(.card-ai) { aspect-ratio: 1; }
+
+  @media (min-width: 1152px) {
+    .card-section__cards { flex-direction: row; }
+    .card-section__cards > :global(.card-ai) { flex: 1 1 0; aspect-ratio: auto; height: 514px; }
+  }
+</style>

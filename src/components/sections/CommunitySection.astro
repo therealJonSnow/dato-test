@@ -1,0 +1,110 @@
+---
+/**
+ * Figma: community-section (breakpoint proposal) — component set 3011:11428
+ *   Breakpoint=1152+ 3011:11404 · 768+ 3011:11412 · <768 3011:11420
+ *   Page instances (Theme=Green): 1320 3029:66064 · 768 3030:20066 · 393 3030:21240 · 1152 3030:18872 · 1920 3030:17672
+ *
+ * Rules implemented:
+ *  - Breakpoints are media queries (768 / 1152), not props. Side padding section/padding-x-headlines,
+ *    vertical section/padding-y; text block max 900, centred. Main gap (text → animation):
+ *    section/padding-x at <768 and ≥1152, space/xl at 768–1151. Text → button gap: space/lg, space/md below 768.
+ *  - Title (Oracle/H1): "Community [•ᴗ•]" text/primary + line break + "Ask us anything…" text/muted.
+ *    Subline Oracle/Body text/soft. Button: Appearance=Deep on White, Variant=Secondary, arrow.
+ *  - HEADING TYPEWRITER: starts when the heading top passes ~75% of the viewport height, plays once:
+ *      0.00 cursor "•" · 0.40 "••" 150ms → "•-" 150ms → "••" 100ms · 0.80 types "Community " at ~65cps ·
+ *      1.00 "[••]" 100ms · 1.10 shuffle 120ms each [**] [~~] [•﹏•] [•_•] [•✓•] [•o•] [^_^] [~ᴗ~] → final [•ᴗ•].
+ *    Only the first line types; "Ask us anything…", the subline and the button are visible from the start.
+ *    Final text always in the DOM (tw__final); reduced motion / no JS = final state.
+ *  - Post-card band: CommunityAnimation (full-bleed, centred, clipped by the section).
+ */
+import Button from '../ui/Button.astro';
+import CommunityAnimation from '../community/CommunityAnimation.astro';
+
+interface Props {
+  theme?: string;
+  title?: string;
+  face?: string;
+  titleMuted?: string;
+  subline?: string;
+  cta?: { label: string; href: string };
+}
+const {
+  theme = 'green',
+  title = 'Community',
+  face = '[•ᴗ•]',
+  titleMuted = 'Ask us anything. We want to know what you’re building.',
+  subline = 'Connect with +3000 developers using DATO CMS in production.',
+  cta = { label: 'Visit Community', href: 'https://community.datocms.com' },
+} = Astro.props;
+---
+<section class="community" data-theme={theme} aria-labelledby="community-title">
+  <div class="community__text-cta">
+    <div class="community__text">
+      <h2 id="community-title" class="community__title t-h1">
+        <span class="community__tw tw" data-community-tw data-word={title + ' '} data-face={face}>
+          <span class="tw__final">{title} {face}</span>
+          <span class="tw__anim" aria-hidden="true"></span>
+        </span>
+        <span class="community__title-muted">{titleMuted}</span>
+      </h2>
+      <p class="community__subline t-body">{subline}</p>
+    </div>
+    <Button href={cta.href} appearance="deep-on-white" variant="secondary" arrow>{cta.label}</Button>
+  </div>
+  <CommunityAnimation />
+</section>
+
+<style>
+  .community {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--section-padding-x);
+    padding: var(--section-padding-y) var(--section-padding-x-headlines);
+    background: var(--surface-default);
+    overflow: clip;
+  }
+  @media (min-width: 768px) and (max-width: 1151.98px) {
+    .community { gap: var(--space-xl); }
+  }
+  .community__text-cta {
+    width: 100%;
+    max-width: 900px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    text-align: center;
+  }
+  @media (min-width: 768px) { .community__text-cta { gap: var(--space-lg); } }
+  .community__text { display: flex; flex-direction: column; gap: var(--space-2xs); width: 100%; }
+  .community__title { color: var(--text-primary); }
+  /* inline-grid = width of the final text, typed left-aligned inside it so nothing shifts while centred */
+  .community__tw { display: inline-grid; text-align: left; }
+  .community__tw > :global(.tw__anim) { white-space: pre; }
+  .community__title-muted { display: block; color: var(--text-muted); }
+  .community__subline { color: var(--text-soft); }
+</style>
+
+<script>
+  import { Typer, sleep, whenInView, prefersReducedMotion } from '../../scripts/typewriter';
+
+  const FACES = ['[**]', '[~~]', '[•﹏•]', '[•_•]', '[•✓•]', '[•o•]', '[^_^]', '[~ᴗ~]'];
+
+  document.querySelectorAll<HTMLElement>('[data-community-tw]').forEach(async (el) => {
+    if (prefersReducedMotion()) return;
+    const t = new Typer(el).start(); // 0.00 — only the cursor "•"
+    // starts when the heading top passes ~75% of the viewport height
+    await whenInView(el.closest('h2') ?? el, { rootMargin: '0px 0px -25% 0px', threshold: 0 });
+    await sleep(400);
+    t.setCursor('••'); await sleep(150);
+    t.setCursor('•-'); await sleep(150);
+    t.setCursor('••'); await sleep(100);
+    t.setCursor('•');
+    await t.type(el.dataset.word!, 65); // 0.80 "Community "
+    t.setCursor('[••]'); await sleep(100); // 1.00
+    await t.cursorFrames(FACES, 120); // 1.10 shuffle
+    t.setCursor(el.dataset.face!); // final [•ᴗ•]
+    t.finish();
+  });
+</script>

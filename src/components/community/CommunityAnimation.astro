@@ -1,0 +1,154 @@
+---
+/**
+ * Figma: community-section-animation — component set 1499:42969 (Step=1 1499:42970 … Step=7 1499:43828)
+ *
+ * Rules implemented (component description + prototype reactions read from each variant):
+ *  - Decorative: aria-hidden, HTML post cards (no video/Lottie).
+ *  - Stage is the 1320×360 design frame, centred on the section and clipped by it (full-bleed band that
+ *    ignores the section padding). Scaled as a whole: 1 at ≥1152, 906/1320 at 768–1151, 641/1320 below 768.
+ *  - Loop Steps 1→7→1 forever. Each card is a crop window (x, y, height) over a full post card; the values
+ *    per step are copied from the variants. Moves: Figma "Slow" spring (mass 1, stiffness 80, damping 20)
+ *    squeezed into 208ms (linear() approximation, cubic-bezier fallback); 7→1 return takes 625ms.
+ *    Holds before each move: 1→2 0 · 2→3 0 · 3→4 300ms · 4→5 0 · 5→6 300ms · 6→7 0 · after 7: 2s (≈4.5s cycle).
+ *  - Runs only while the section is in view (pauses off-screen, resumes where it stopped).
+ *  - prefers-reduced-motion / no JS: Step 1, static (Step 1 is the server-rendered state).
+ *  - Hidden "cta-buttons" layers are not built.
+ */
+import PostCard from './PostCard.astro';
+
+// [x, y, height] per step (1..7) in the 1320×360 frame — from Figma variants 1499:42970…1499:43828
+const STEPS: Record<string, [number, number, number][]> = {
+  card4: Array(7).fill([320, 0, 360]),
+  card1: [[-390, 63, 235], [300, 63, 235], [298, 23, 315], [298, 23, 315], [298, 23, 315], [298, 23, 315], [298, 23, 315]],
+  card2: [[-1100, 84, 190], [-410, 84, 190], [-410, 84, 190], [280, 84, 190], [276, 46, 270], [276, 46, 270], [276, 46, 270]],
+  card3: [[-1810, 106, 146], [-1133, 106, 146], [-1104, 113, 145], [-430, 106, 145], [-430, 106, 145], [254, 108, 145], [254, 69, 225]],
+};
+const style = (k: string) => {
+  const [x, y, h] = STEPS[k][0];
+  return `transform: translate(${x}px, ${y}px); height: ${h}px`;
+};
+---
+<div class="community-anim" aria-hidden="true" data-community-anim={JSON.stringify(STEPS)}>
+  <div class="community-anim__stage">
+    <div class="community-anim__card community-anim__card--framed" data-card="card4" style={style('card4')}>
+      <PostCard
+        user="thomas.vanleynseele" date="30d"
+        title="Manual drag & drop record sorting not working anymore and all have the same position (when created in parallel)"
+        solvedUser="roger" solvedDate="Month Ago"
+      />
+    </div>
+    <div class="community-anim__card community-anim__card--framed" data-card="card1" style={style('card1')}>
+      <PostCard
+        user="yiying.lim" date="23d" right="expand"
+        title="Hitting MODULAR_BLOCK_IN_USE when performing migration"
+        solvedUser="m.finamor" solvedDate="22d" solvedUserSoft solvedDateFaded
+      />
+    </div>
+    <div class="community-anim__card community-anim__card--framed" data-card="card2" style={style('card2')}>
+      <PostCard
+        user="Dev7" date="16d" right="expand"
+        title="Vercel builds fail with connection error to graphql.datocms.com"
+        solvedUser="roger" solvedDate="16d"
+      />
+    </div>
+    <div class="community-anim__card" data-card="card3" style={style('card3')}>
+      <PostCard
+        user="Lee" date="Yesterday" right="tag" tag="Feature Request"
+        title="Control Video Thumbnail/Poster"
+        solvedUser="mat_jack1" solvedDate="23d" solvedDateSmall
+      />
+    </div>
+  </div>
+</div>
+
+<style>
+  .community-anim {
+    --scale: calc(641 / 1320);
+    position: relative;
+    width: 100%;
+    height: calc(360px * var(--scale));
+  }
+  @media (min-width: 768px) { .community-anim { --scale: calc(906 / 1320); } }
+  @media (min-width: 1152px) { .community-anim { --scale: 1; } }
+
+  .community-anim__stage {
+    position: absolute;
+    top: 0;
+    left: 50%;
+    width: 1320px;
+    height: 360px;
+    transform: translateX(-50%) scale(var(--scale));
+    transform-origin: 50% 0;
+  }
+  .community-anim__card {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 680px;
+    overflow: hidden;
+    border-radius: var(--radius-md);
+    background: var(--surface-default);
+    /* "Slow" spring (m1 k80 c20), normalised to the step duration */
+    transition-property: transform, height;
+    transition-duration: var(--move, 208ms);
+    transition-timing-function: cubic-bezier(0.2, 0.85, 0.25, 1);
+    transition-timing-function: linear(0, 0.003 0.8%, 0.023 2.5%, 0.073 4.8%, 0.153 7.6%, 0.257 10.9%, 0.371 14.6%, 0.486 18.6%, 0.593 23.1%, 0.686 27.9%, 0.764 33%, 0.826 38.4%, 0.875 44.2%, 0.911 50.2%, 0.938 56.5%, 0.958 63.1%, 0.972 70%, 0.981 77.1%, 0.988 84.5%, 0.992 92.1%, 1 100%);
+  }
+  /* The inner post card has its own 1px border; the crop frame repeats it so the cropped edge is closed.
+     card3's crop frame has no stroke in Figma, so its cut edge stays open. */
+  .community-anim__card::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border: 1px solid var(--border-default);
+    border-radius: inherit;
+    pointer-events: none;
+  }
+  .community-anim__card:not(.community-anim__card--framed)::after { border-bottom-color: transparent; }
+  @media (prefers-reduced-motion: reduce) {
+    .community-anim__card { transition: none; }
+  }
+</style>
+
+<script>
+  import { onVisibility, prefersReducedMotion } from '../../scripts/typewriter';
+
+  // hold before leaving step n (index n-1), and move durations
+  const HOLD = [0, 0, 300, 0, 300, 0, 2000];
+  const MOVE = 208;
+  const RETURN = 625;
+
+  document.querySelectorAll<HTMLElement>('[data-community-anim]').forEach((root) => {
+    if (prefersReducedMotion()) return;
+    const steps = JSON.parse(root.dataset.communityAnim!) as Record<string, [number, number, number][]>;
+    const cards = [...root.querySelectorAll<HTMLElement>('[data-card]')];
+    let step = 0; // 0-based
+    let timer: number | undefined;
+    let running = false;
+
+    const apply = (s: number, ms: number) => {
+      for (const el of cards) {
+        const [x, y, h] = steps[el.dataset.card!][s];
+        el.style.setProperty('--move', `${ms}ms`);
+        el.style.transform = `translate(${x}px, ${y}px)`;
+        el.style.height = `${h}px`;
+      }
+    };
+    const tick = () => {
+      if (!running) return;
+      timer = window.setTimeout(() => {
+        if (!running) return;
+        const next = (step + 1) % 7;
+        const ms = next === 0 ? RETURN : MOVE;
+        apply(next, ms);
+        step = next;
+        timer = window.setTimeout(tick, ms);
+      }, HOLD[step]);
+    };
+    onVisibility(
+      root,
+      () => { if (!running) { running = true; tick(); } },
+      () => { running = false; clearTimeout(timer); },
+    );
+  });
+</script>

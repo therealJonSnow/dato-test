@@ -1,0 +1,112 @@
+---
+/**
+ * Figma: "solved-post-card" inside community-section-animation (1499:42969), e.g. 1499:42972 / 1499:43010.
+ * Decorative illustration (the whole band is aria-hidden). Per the community-section description the cards'
+ * small text and spacing are illustration and are drawn at the 1320 design size with fixed px values —
+ * the band is scaled as a whole, so nothing here follows the Sizing tokens. Colours do use theme tokens.
+ *  - 680 wide; header (avatar 40 + username · date) + optional right slot (expand icon or "Feature Request" tag),
+ *    H1 title, then the green "Solved" bar that bleeds to the card edges.
+ *  - The hidden "cta-buttons" layers (opacity 0 / hidden in Figma) are intentionally NOT built.
+ *  - Avatars are raster images in Figma → .asset-placeholder circles.
+ */
+interface Props {
+  user: string;
+  date: string;
+  title: string;
+  right?: 'none' | 'expand' | 'tag';
+  tag?: string;
+  solvedUser: string;
+  solvedDate: string;
+  solvedUserSoft?: boolean;
+  solvedDateFaded?: boolean;
+  solvedDateSmall?: boolean;
+}
+const {
+  user, date, title, right = 'none', tag = 'Feature Request',
+  solvedUser, solvedDate, solvedUserSoft = false, solvedDateFaded = false, solvedDateSmall = false,
+} = Astro.props;
+---
+<div class="post">
+  <div class="post__header">
+    <div class="post__user">
+      <span class="post__avatar asset-placeholder"></span>
+      <span class="post__meta">
+        <span class="post__name">{user}</span><span class="post__dot"></span><span class="post__date">{date}</span>
+      </span>
+    </div>
+    {right === 'expand' && <span class="post__expand"></span>}
+    {right === 'tag' && <span class="post__tag">{tag}</span>}
+  </div>
+  <p class="post__title">{title}</p>
+  <div class="post__solved">
+    <div class="post__user">
+      <span class="post__avatar post__avatar--mono asset-placeholder"></span>
+      <span class="post__meta">
+        <span class:list={['post__name', solvedUserSoft && 'post__name--soft']}>{solvedUser}</span><span class="post__dot"></span><span
+          class:list={['post__date', solvedDateFaded && 'post__date--faded', solvedDateSmall && 'post__date--small']}>{solvedDate}</span>
+      </span>
+    </div>
+    <span class="post__status">
+      Solved
+      <svg width="40" height="40" viewBox="0 0 40 40" aria-hidden="true">
+        <mask id="post-check-mask">
+          <rect width="40" height="40" fill="#fff" />
+          <path d="M11.5 20.5 17 26l11.5-12" fill="none" stroke="#000" stroke-width="5" stroke-linecap="square" />
+        </mask>
+        <circle cx="20" cy="20" r="20" fill="currentColor" mask="url(#post-check-mask)" />
+      </svg>
+    </span>
+  </div>
+</div>
+
+<style>
+  .post {
+    width: 680px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    padding: 20px 20px 0;
+    background: var(--surface-default);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+  }
+  .post__header { display: flex; align-items: center; justify-content: space-between; }
+  .post__user { display: flex; align-items: center; gap: 10px; }
+  .post__avatar {
+    width: 40px; height: 40px; padding: 0; flex: none;
+    border-radius: 50%;
+    box-shadow: inset 0 0 0 1.25px var(--border-default);
+  }
+  .post__avatar--mono { mix-blend-mode: luminosity; }
+  .post__meta { display: flex; align-items: center; gap: 4px; font: 400 20px/1.3 var(--font-sans); letter-spacing: -0.01em; white-space: nowrap; }
+  .post__name { font-weight: 500; color: var(--text-primary); }
+  .post__name--soft { color: var(--text-soft); }
+  .post__dot { width: 4px; height: 4px; border-radius: 50%; background: var(--surface-inverse); }
+  .post__date { color: var(--text-soft); }
+  .post__date--faded { opacity: 0.3; }
+  .post__date--small { font: 500 16px/1 var(--font-sans); letter-spacing: -0.01em; }
+  .post__expand { width: 20px; height: 20px; }
+  .post__tag {
+    display: inline-flex; align-items: center; height: 38px; padding: 10px 20px;
+    border-radius: var(--radius-full);
+    background: var(--surface-subtle);
+    color: var(--text-muted);
+    font: 500 16px/1 var(--font-sans); letter-spacing: -0.01em; white-space: nowrap;
+  }
+  .post__title { font: 500 45px/1 var(--font-sans); letter-spacing: -0.04em; }
+  .post__solved {
+    height: 93px;
+    margin-inline: -20px;
+    padding: 20px 32px 20px 20px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    background: var(--surface-accent);
+  }
+  .post__status {
+    display: flex; align-items: center; gap: 20px; height: 40px;
+    font: 500 30px/1.1 var(--font-sans); letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+  .post__status svg { color: var(--surface-inverse); }
+</style>

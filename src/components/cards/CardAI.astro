@@ -1,0 +1,225 @@
+---
+/**
+ * Figma: Card-AI (proposal) — component set 3001:14431 (State=Default 3001:14416, State=Hover 3001:14423)
+ *
+ * Rules implemented (from the component description):
+ *  - Auto layout: title top, body text bottom, padding space/lg, radius md, surface/inverse fill.
+ *    Width/height come from the parent section (CardSection sets 514px tall ≥1152, square below).
+ *  - HOVER (title band + arrow) is instant, desktop pointers only — `(hover: hover) and (pointer: fine)`,
+ *    so touch devices show Default only. Same look on keyboard focus (:focus-within).
+ *  - TYPEWRITER in the body (src/scripts/typewriter.ts), ~55 cps ±40% jitter, cursor "•":
+ *      trigger when the card is 50% visible; cards inside one [data-card-ai-row] start 1.2s apart
+ *      (card 1 → card 2), plays once, hover never starts it.
+ *      "connect": +0.15s type question → 0.5s pause → slot-machine AI names (100ms, ~0.75s, no cursor)
+ *                 → lands on "C" → types rest of answer → cursor "••" → "[••]" → 0.3s → "[>.<]" (final).
+ *      "teach":   cursor thinks •/•• (100ms, 0.4s) ends "••" → "[••]" → types command →
+ *                 new paragraph "~/." 0.35s pause "claude/skills/" → each row: "  ├── " instant + name typed
+ *                 → cursor disappears after the last row.
+ *  - Final layer (= static design) is always in the DOM for screen readers; anim layer is aria-hidden.
+ *  - prefers-reduced-motion / no JS: final state immediately.
+ */
+interface Connect {
+  kind: 'connect';
+  question: string;
+  /** answer text without the face, e.g. "Claude: 8 pages are missing them " (trailing space kept) */
+  answer: string;
+  /** names shuffled like a slot machine; the first one is where it lands */
+  aiNames?: string[];
+  face?: string;
+}
+interface Teach {
+  kind: 'teach';
+  /** typed after the "[••]" face, e.g. "npx skills add datocms" */
+  command: string;
+  /** typed as `pathHead` + 0.35s pause + `pathTail` */
+  pathHead: string;
+  pathTail: string;
+  items: string[];
+  treePrefix?: string;
+}
+interface Props {
+  title: string;
+  href?: string;
+  content: Connect | Teach;
+}
+const { title, href, content } = Astro.props;
+const face = content.kind === 'connect' ? content.face ?? '[>.<]' : '[••]';
+const prefix = content.kind === 'teach' ? content.treePrefix ?? '  ├── ' : '';
+const data = JSON.stringify(
+  content.kind === 'connect'
+    ? { ...content, aiNames: content.aiNames ?? ['Claude', 'Chat-GPT', 'Gemini'], face }
+    : { ...content, treePrefix: prefix },
+);
+---
+<article class="card-ai" data-card-ai={data}>
+  <h3 class="card-ai__title t-h1">
+    {href ? <a class="card-ai__link" href={href}>{title}</a> : <span>{title}</span>}
+    <span class="card-ai__arrow" aria-hidden="true">→</span>
+  </h3>
+  <div class="card-ai__body tw t-h1">
+    <span class="tw__final">
+      {content.kind === 'connect' ? (
+        <>
+          <span class="card-ai__p card-ai__p--muted">{content.question}</span>
+          <span class="card-ai__p">{content.answer}{face}</span>
+        </>
+      ) : (
+        <>
+          <span class="card-ai__p card-ai__p--muted">{face} {content.command}</span>
+          <span class="card-ai__p">{content.pathHead + content.pathTail}{content.items.map((i) => '\n' + prefix + i).join('')}</span>
+        </>
+      )}
+    </span>
+    <span class="tw__anim" aria-hidden="true"></span>
+  </div>
+</article>
+
+<style>
+  .card-ai {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    padding: var(--space-lg);
+    border-radius: var(--radius-md);
+    background: var(--surface-inverse);
+    color: var(--text-on-inverse);
+    overflow: clip;
+    min-width: 0;
+    isolation: isolate;
+  }
+  /* Hover band (Figma "Rectangle 41242": full width, padding + one H1 line + padding, surface/accent) */
+  .card-ai::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: calc(2 * var(--space-lg) + var(--type-h1));
+    background: var(--surface-accent);
+    visibility: hidden;
+    z-index: -1;
+  }
+  .card-ai__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    white-space: nowrap;
+  }
+  .card-ai__arrow { opacity: 0; }
+  /* Whole card is the click target when it has a link */
+  .card-ai__link::after { content: ''; position: absolute; inset: 0; z-index: 1; }
+  .card-ai__link:focus-visible { outline: none; }
+  .card-ai:has(.card-ai__link:focus-visible) { outline: 2px solid var(--border-strong); outline-offset: 3px; }
+
+  @media (hover: hover) and (pointer: fine) {
+    .card-ai:hover::before { visibility: visible; }
+    .card-ai:hover .card-ai__title { color: var(--text-primary); }
+    .card-ai:hover .card-ai__arrow { opacity: 1; }
+  }
+  .card-ai:has(.card-ai__link:focus-visible)::before { visibility: visible; }
+  .card-ai:has(.card-ai__link:focus-visible) .card-ai__title { color: var(--text-primary); }
+  .card-ai:has(.card-ai__link:focus-visible) .card-ai__arrow { opacity: 1; }
+
+  .card-ai__body > :global(.tw__final),
+  .card-ai__body > :global(.tw__anim) {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    align-self: start;
+  }
+  .card-ai__body :global(.card-ai__p) { display: block; white-space: pre-wrap; color: var(--text-on-inverse); }
+  .card-ai__body :global(.card-ai__p--muted) { color: var(--text-on-inverse-muted); }
+</style>
+
+<script>
+  import { Typer, sleep, whenInView, prefersReducedMotion } from '../../scripts/typewriter';
+
+  const CPS = 55;
+
+  type Data =
+    | { kind: 'connect'; question: string; answer: string; aiNames: string[]; face: string }
+    | { kind: 'teach'; command: string; pathHead: string; pathTail: string; items: string[]; treePrefix: string };
+
+  function prepare(card: HTMLElement) {
+    const body = card.querySelector<HTMLElement>('.tw')!;
+    const t = new Typer(body);
+    (t.anim.firstElementChild as HTMLElement).className = 'card-ai__p card-ai__p--muted';
+    t.start(); // before start: body empty except the cursor
+    return t;
+  }
+
+  async function playConnect(t: Typer, d: Extract<Data, { kind: 'connect' }>) {
+    await sleep(150);
+    await t.type(d.question, CPS);
+    await sleep(500);
+    t.run('card-ai__p');
+    // slot machine: no cursor while shuffling, swap every ~100ms for ~0.75s
+    t.setCursor('');
+    const names = d.aiNames;
+    let shown = '';
+    for (let i = 0; i < 8; i++) {
+      t.erase(shown.length);
+      shown = names[(i + 1) % names.length];
+      t.write(shown);
+      await sleep(100);
+    }
+    // lands on the first letter of the first name, then the rest is typed
+    t.erase(shown.length);
+    t.write(d.answer[0]);
+    t.setCursor('•');
+    await t.type(d.answer.slice(1), CPS);
+    t.setCursor('••');
+    await sleep(1000 / CPS);
+    t.setCursor('[••');
+    await sleep(1000 / CPS);
+    t.setCursor('[••]');
+    await sleep(300);
+    t.setCursor(d.face);
+  }
+
+  async function playTeach(t: Typer, d: Extract<Data, { kind: 'teach' }>) {
+    await t.cursorFrames(['••', '•', '••', '•'], 100);
+    t.setCursor('••');
+    await sleep(100);
+    t.setCursor('[••');
+    await sleep(1000 / CPS);
+    t.setCursor('[••]');
+    await sleep(1000 / CPS);
+    t.write('[••]');
+    t.setCursor('•');
+    await t.type(' ' + d.command, CPS);
+    t.run('card-ai__p'); // blank line = paragraph gap
+    await t.type(d.pathHead, CPS);
+    await sleep(350);
+    await t.type(d.pathTail, CPS);
+    for (const item of d.items) {
+      await t.type('\n', CPS);
+      t.write(d.treePrefix);
+      await t.type(item, CPS);
+    }
+    t.setCursor(null);
+  }
+
+  function init() {
+    const cards = [...document.querySelectorAll<HTMLElement>('[data-card-ai]')];
+    if (!cards.length || prefersReducedMotion()) return;
+    const rowStarts = new Map<Element, Promise<void>>();
+    cards.forEach((card) => {
+      const d = JSON.parse(card.dataset.cardAi!) as Data;
+      const t = prepare(card);
+      const row = card.closest('[data-card-ai-row]');
+      const siblings = row ? [...row.querySelectorAll('[data-card-ai]')] : [card];
+      const index = siblings.indexOf(card);
+      const first = siblings[0];
+      if (!rowStarts.has(first)) rowStarts.set(first, whenInView(first, { threshold: 0.5 }));
+      const start = Promise.all([
+        whenInView(card, { threshold: 0.5 }),
+        rowStarts.get(first)!.then(() => sleep(1200 * index)),
+      ]);
+      start
+        .then(() => (d.kind === 'connect' ? playConnect(t, d) : playTeach(t, d)))
+        .then(() => t.finish());
+    });
+  }
+  init();
+</script>
