@@ -13,10 +13,12 @@
  * - test/headless-* Sizing variables are scoped custom properties below (--hl-*), one block per
  *   Sizing mode (393 base / 768 / 1152 / 1320+). Display + D size are container-relative (cqi).
  * - The list overflows above/below the content column and is clipped by the section.
- * - MOTION (code only; timing frame "headless-cms-section-animation" 1499:47138 could not be read,
- *   see docs/notes/showcase.md): every 2.4s the list moves up by one item with a CSS transform
- *   (700ms, ease-in-out), the new centre item fades to 100%, the old one to 30%. Infinite loop.
- *   Paused while off-screen or the tab is hidden. prefers-reduced-motion: static (Chatbot centred).
+ * - MOTION from headless-cms-section-animation (1499:47138, page "Responsive (source of truth)"):
+ *   hold 0.8s, then the list moves up one row with a CSS transform — 416ms, Figma "Slow" spring
+ *   (mass 1, stiffness 80, damping 20 → overdamped, approximated with linear() below). The new
+ *   centre item fades to 100%, the old one to 30%. Infinite and seamless (no gap, no visible jump).
+ *   "D" and the label stay still. Starts in view, pauses off-screen / hidden tab.
+ *   prefers-reduced-motion: static Step 1 (Chatbot centred).
  */
 import HeadlessLockup from '../headless/HeadlessLockup.astro';
 
@@ -69,9 +71,9 @@ const {
     --hl-symbol-lift: 1px;
     --hl-show-full-label: none;
     --hl-show-short-label: inline;
-    /* motion (not in Figma variables — see header) */
-    --hl-move-dur: 700ms;
-    --hl-move-ease: cubic-bezier(0.65, 0, 0.35, 1);
+    /* motion (prototype of headless-cms-section-animation — see header) */
+    --hl-move-dur: 416ms;
+    --hl-move-ease: linear(0, 0.165 6%, 0.413 12%, 0.612 19%, 0.750 25%, 0.841 31%, 0.899 38%, 0.936 44%, 0.960 50%, 0.975 56%, 0.984 62%, 0.990 69%, 0.994 75%, 0.996 81%, 0.997 88%, 0.998 94%, 1);
 
     background: var(--surface-inverse);
     color: var(--text-on-inverse);
@@ -170,7 +172,10 @@ const {
 </style>
 
 <script>
-  const STEP_MS = 2400;
+  // Figma: AFTER_TIMEOUT 0.8s on each step (counted once the previous move has landed) + 416ms move
+  const HOLD_MS = 800;
+  const MOVE_MS = 416;
+  const STEP_MS = HOLD_MS + MOVE_MS;
 
   function initList(section: HTMLElement) {
     const list = section.querySelector<HTMLElement>('[data-hl-list]');

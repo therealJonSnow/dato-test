@@ -2,14 +2,14 @@
 /**
  * Figma: footer-links (1492:33921, variants Size=1320|1152|768|393|1920|2560), Theme=Purple
  * Instances: 1320 3029:66071 · 768 3030:20073 · 393 3030:21247
- * (No component description in Figma; layout measured from the variants.)
+ * (No component description in Figma. Values verified against node data at 1320.)
  * - surface/inverse background; padding space/2xl top/bottom at every size,
  *   section/padding-x sides; content max 1160 centred.
  * - Six columns: ≥1152 one row, columns content-sized and spread (space-between);
  *   768: 3-column grid; 393: 2-column grid; grid gaps space/2xl.
  * - Group heading: Oracle/Subtitle Regular, text/on-inverse-soft. Links: Oracle/Subtitle Medium,
  *   text/on-inverse. Lines 4px apart (space/3xs), groups in a column space/lg apart.
- * - Status group uses the Green primitives (heading Green Light/350, link + dot Green Light/400)
+ * - Status group uses the Green primitives (heading Green Light/300, link + 8px dot Green Light/400, 10px gap)
  *   regardless of theme.
  * - Hover / focus: underline (not specified in Figma — matches nav-link).
  */
@@ -113,7 +113,7 @@ const { columns = defaultColumns, theme = 'purple' } = Astro.props;
   .footer-links__link {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-xs);
+    gap: var(--space-2xs);
     color: var(--text-on-inverse);
     white-space: nowrap;
   }
@@ -121,11 +121,11 @@ const { columns = defaultColumns, theme = 'purple' } = Astro.props;
   .footer-links__link:focus-visible { text-decoration: underline; text-decoration-thickness: from-font; }
   .footer-links__link:focus-visible { outline: 2px solid var(--border-on-inverse-strong); outline-offset: 2px; }
 
-  .footer-links__group--status .footer-links__heading { color: var(--color-green-light-350); }
+  .footer-links__group--status .footer-links__heading { color: var(--color-green-light-300); }
   .footer-links__group--status .footer-links__link { color: var(--color-green-light-400); }
   .footer-links__dot {
-    width: 6px;
-    height: 6px;
+    width: 8px;
+    height: 8px;
     border-radius: var(--radius-full);
     background: currentColor;
     flex-shrink: 0;
@@ -138,7 +138,7 @@ const { columns = defaultColumns, theme = 'purple' } = Astro.props;
     .footer-links__grid {
       display: flex;
       justify-content: space-between;
-      gap: var(--space-md);
+      gap: var(--space-2xl);
     }
   }
 </style>
