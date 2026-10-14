@@ -67,14 +67,17 @@ These raw values were mapped to theme tokens in code so they re-theme.
   - Logo fills.
   - The D symbol.
   - Footer status (raw Green primitives; suggest a `status/ok` token).
-- [~] **Theme collection**
+- [x] **Theme collection**
   - [x] `surface/inverse-fade` and `surface/default-pressed` were raw values, not aliases. Both variables are deleted; their uses now bind the real token and set the opacity on the paint:
     - **Button Pressed:** the 4 Deep on Light / Light on Deep Pressed variants (2049:8316, 2049:8325, 2401:7084, 2401:7093) now use fill + stroke = `surface/default` at 70% paint opacity.
       - They previously stacked 70% paint opacity on a 70%-alpha token (≈49%), so pressed is now slightly more solid. That's the intended value.
     - **headless-cms-section-animation fades:** the 24 gradient fades (`dimmed-top` / `dimmed-bottom` overrides on the instances) now end on a stop bound to `surface/inverse` with stop alpha 0%. Checked visually.
     - Note: the source component (1499:47139, Step=1) has unbound raw gradient stops; only the instances were bound.
     - Gotcha for the next agent: binding a variable through the API resets the paint/stop opacity to 100%, so set the opacity again *after* binding.
-  - [ ] The Default mode uses "Brown" and "Yellow" instead of the `<Colour> Deep/Light` naming.
+  - [x] The Default mode used "Brown" and "Yellow" instead of the `<Colour> Deep/Light` naming. The primitives are now **Brown Deep** and **Yellow Light**.
+    - Rule: each Theme mode = one Deep family + one Light family. Default = Brown Deep + Yellow Light; Orange = Orange Deep + Orange Light; Green, Purple, Blue and Pink follow the same pattern.
+    - The prefix describes the hue honestly, so the Default pair has two different prefixes. Purple Deep (#1d2229) is also really a near-black, but was left as-is.
+    - Figma variable collections can't hold a description, so this rule lives here.
 - [ ] **Component-specific variables in the global Sizing collection:** the `test/headless-*` set.
 - [ ] **Text style descriptions don't match use:** Display is "for heroes", but the hero uses H1. product-update-item and the headless headline switch between H1 and H2 at a breakpoint without saying so.
 
@@ -99,6 +102,9 @@ These raw values were mapped to theme tokens in code so they re-theme.
 - None open. Note for next time: "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, so an agent can't edit text in this file. Upload the font as a team font to allow it.
 
 ### Code follow-ups (when we update the site)
+- Primitives were renamed and renumbered in Figma; update `primitives.css` and `theme.css` to match:
+  - `Brown/*` → `Brown Deep/*` and `Yellow/*` → `Yellow Light/*`.
+  - Steps are now Deep 5–1 (was 800/750/700/600/500) and Light 5–0 (was 400/350/300/200/100/50), for every family.
 - Tokens: remove `--surface-inverse-fade` and `--surface-default-pressed` from `theme.css`. Button pressed = `color-mix(in srgb, var(--surface-default) 70%, transparent)`, and fades use `var(--surface-inverse)` → transparent.
 - Hero: remove the `<768` padding/gap rule, end the typewriter on "[••]" (it currently switches to "[•ᴥ•]"), and use the new subheadline copy.
 - Footer-cta: add the hover smile ("[••]" → "[•ᴗ•]").
