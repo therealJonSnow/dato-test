@@ -85,7 +85,7 @@ These raw values were mapped to theme tokens in code so they re-theme.
 - [ ] **Spring vs duration:** Figma "Slow" springs (m1 k80 c20) take about 1s to settle, but the prototypes say 208ms or 416ms. The code compresses them into the stated durations with CSS `linear()` curves. Suggestion: specify motion as duration + cubic-bezier.
 - [ ] **headless-cms list:** it isn't a real cycle (irregular repeats, "Mobile" appears only in the animation strip), so the code uses a clean 9-item loop.
 - [ ] **Card-AI "lands on C…":** interpreted as the shuffle ending on "C", after which the rest of the answer is typed.
-- [ ] **Missing timing:** the developer-editor transition is still "to be agreed (~300ms)".
+- [x] **Missing timing:** the developer-editor transition said "to be agreed (~300ms)". The description (3026:11822) now states 300ms ease-out. The code already uses 300ms ease-out.
 
 ### 6. Missing information
 - [ ] No link targets anywhere, so every link is `#`.
