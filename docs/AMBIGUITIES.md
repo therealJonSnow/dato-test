@@ -96,7 +96,7 @@ These raw values were mapped to theme tokens in code so they re-theme.
   - footer-links: layout, type and colour, the Status group, breakpoints (1152 uses space/xl, 768 a 3-column grid, 393 a 2-column grid), links and hover.
   - footer-legal: layout, Caption text, mailto, and the 393 wrap/right-align.
 - [ ] The chevron icon in the community cards is an empty frame.
-- [ ] The "Feature Request" pill in a community card is visible, although the note says "cta-buttons are hidden".
+- [x] The "Feature Request" pill in a community card was visible, although the note said "cta-buttons are hidden". The community-section-animation description (1499:42969) now matches the component: build card3's "Feature Request" tag; the "Content Delivery API" tags and card4's tag row are hidden. The code already does this.
 
 ### Manual steps (blocked for the agent)
 - None open. Note for next time: "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, so an agent can't edit text in this file. Upload the font as a team font to allow it.
