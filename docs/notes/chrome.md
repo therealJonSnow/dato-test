@@ -2,7 +2,7 @@
 
 ## (a) Ambiguities, contradictions, missing info, and what I decided
 
-1. **Figma MCP rate limit.** Partway through, get_design_context and use_figma began returning "tool call limit reached". Screenshots still worked. Because of this, footer-links (1492:33921) was built from the 1320, 768 and 393 screenshots plus pixel measurements, not from node data:
+1. *(Update from lead: footer-links was re-checked against node data at 1320 afterwards. Column gap = space/2xl, status dot = 8px, dot gap = space/2xs, Status heading = Green Light/300. All fixed.)* **Figma MCP rate limit.** Partway through, get_design_context and use_figma began returning "tool call limit reached". Screenshots still worked. Because of this, footer-links (1492:33921) was built from the 1320, 768 and 393 screenshots plus pixel measurements, not from node data:
    - Padding is 60 top/bottom at every size (space/2xl).
    - The grid is 2 columns, then 3 columns at 768, then one row at 1152 and up. Gap is 60.
    - Lines are 4px apart and groups are 30px apart.
