@@ -102,6 +102,7 @@ These raw values were mapped to theme tokens in code so they re-theme.
 - None open. Note for next time: "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, so an agent can't edit text in this file. Upload the font as a team font to allow it.
 
 ### Code follow-ups (when we update the site)
+- Code-snippet-preview tabs: Figma (2614:18656) replaced the custom pills with Button instances, Light on Deep. Selected tab = Primary, others = Secondary, no arrow. Use `Button.astro` for the tabs (keep the ARIA tablist behaviour).
 - Primitives were renamed and renumbered in Figma; update `primitives.css` and `theme.css` to match:
   - `Brown/*` → `Brown Deep/*` and `Yellow/*` → `Yellow Light/*`.
   - Steps are now Deep 5–1 (was 800/750/700/600/500) and Light 5–0 (was 400/350/300/200/100/50), for every family.
