@@ -67,7 +67,14 @@ These raw values were mapped to theme tokens in code so they re-theme.
   - Logo fills.
   - The D symbol.
   - Footer status (raw Green primitives; suggest a `status/ok` token).
-- [ ] **Theme collection:** `surface/inverse-fade` and `surface/default-pressed` are raw values, not aliases. The Default mode uses "Brown" and "Yellow" instead of the `<Colour> Deep/Light` naming.
+- [~] **Theme collection**
+  - [x] `surface/inverse-fade` and `surface/default-pressed` were raw values, not aliases. Both variables are deleted; their uses now bind the real token and set the opacity on the paint:
+    - **Button Pressed:** the 4 Deep on Light / Light on Deep Pressed variants (2049:8316, 2049:8325, 2401:7084, 2401:7093) now use fill + stroke = `surface/default` at 70% paint opacity.
+      - They previously stacked 70% paint opacity on a 70%-alpha token (≈49%), so pressed is now slightly more solid. That's the intended value.
+    - **headless-cms-section-animation fades:** the 24 gradient fades (`dimmed-top` / `dimmed-bottom` overrides on the instances) now end on a stop bound to `surface/inverse` with stop alpha 0%. Checked visually.
+    - Note: the source component (1499:47139, Step=1) has unbound raw gradient stops; only the instances were bound.
+    - Gotcha for the next agent: binding a variable through the API resets the paint/stop opacity to 100%, so set the opacity again *after* binding.
+  - [ ] The Default mode uses "Brown" and "Yellow" instead of the `<Colour> Deep/Light` naming.
 - [ ] **Component-specific variables in the global Sizing collection:** the `test/headless-*` set.
 - [ ] **Text style descriptions don't match use:** Display is "for heroes", but the hero uses H1. product-update-item and the headless headline switch between H1 and H2 at a breakpoint without saying so.
 
@@ -92,6 +99,7 @@ These raw values were mapped to theme tokens in code so they re-theme.
 - None open. Note for next time: "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, so an agent can't edit text in this file. Upload the font as a team font to allow it.
 
 ### Code follow-ups (when we update the site)
+- Tokens: remove `--surface-inverse-fade` and `--surface-default-pressed` from `theme.css`. Button pressed = `color-mix(in srgb, var(--surface-default) 70%, transparent)`, and fades use `var(--surface-inverse)` → transparent.
 - Hero: remove the `<768` padding/gap rule, end the typewriter on "[••]" (it currently switches to "[•ᴥ•]"), and use the new subheadline copy.
 - Footer-cta: add the hover smile ("[••]" → "[•ᴗ•]").
 
