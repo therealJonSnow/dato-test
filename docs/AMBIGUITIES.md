@@ -49,8 +49,7 @@ Legend: `[x]` done in Figma · `[~]` partly done (the rest needs a manual step) 
 
 ### 3. Page instances override the components silently
 - [x] **Hero at 393:** an extra padding-top and gap bound to `section/padding-y` were set only on the instance. The override is removed (unbound, set to 0). The hero is now 400 tall and the frame reflowed.
-- [~] **Code-snippet-preview:** height overridden to 580. Only the 393 instance actually differs: it swaps to Size=393 (528) but keeps 580 from the feature-section Breakpoint=<1152 variant.
-  - ⚠️ Manual step: set the snippet in the 393 feature-section to 528, or fix it in the variant. The Plugin API won't resize a layer nested inside an instance.
+- [x] **Code-snippet-preview:** height overridden to 580 on the page. Decision: 580 is correct at every size. The Size=393 variant (2614:18657) was resized from 528 to 580 (by hand), so components and page now agree. The code already uses 580.
 - [ ] **Instance text left as placeholders** (blocked by the font, see below):
   - "Primary Button" → "Join us on Slack" on the 6 Slack-band instances.
   - Trailing "\n" on the Card-AI question at 768 and 393.
@@ -94,12 +93,10 @@ These raw values were mapped to theme tokens in code so they re-theme.
   - the Slack button label,
   - the trailing-whitespace trims.
   - Either edit them by hand, or upload the font as a team font and the agent can redo them.
-- **Code-snippet-preview 393 height:** see section 3.
 
 ### Code follow-ups (when we update the site)
 - Hero: remove the `<768` padding/gap rule, end the typewriter on "[••]" (it currently switches to "[•ᴥ•]"), and use the new subheadline copy.
 - Footer-cta: add the hover smile ("[••]" → "[•ᴗ•]").
-- Code snippet: use 528 at 393 once Figma is fixed (the code currently uses `min-height: 580px`).
 
 ## What worked well (keep doing this)
 - Breakpoints as variable modes + "Breakpoint" variants with "in code this is a media query, NOT a prop". This mapped one-to-one to CSS.
