@@ -1,0 +1,102 @@
+---
+/**
+ * Figma: product-updates-section (breakpoint proposal) (3014:13045), Theme=Green on the homepage.
+ * Instances: 1320 3029:66066 · 768 3030:20068 · 393 3030:21242 · 1152 3030:18874 · 1920 3030:17674.
+ *
+ * - Surface: surface/inverse. Heading = h2, line 1 text/on-inverse, line 2 text/on-inverse-muted.
+ * - Padding: top section/padding-y, sides section/padding-x, NO bottom padding.
+ *   Gap heading → list = section/padding-x (at every width). Content capped at 1160, centred.
+ * - Breakpoints only change the row layout (handled in ProductUpdateItem); section is the same.
+ * - Full-width 1px dividers (surface/accent-pressed) after every row, spanning the whole section.
+ * - Rows hover ≥1152 on hover-capable devices only (instant); "Show All" hover = card-cloud-sync Hover.
+ *   No other motion.
+ */
+import ProductUpdateItem from '../updates/ProductUpdateItem.astro';
+import CardCloudSync from '../updates/CardCloudSync.astro';
+
+interface Update {
+  date: string;
+  datetime?: string;
+  title: string;
+  tags: string[];
+  author?: string;
+  userpic?: string;
+  href?: string;
+}
+interface Props {
+  theme?: string;
+  heading?: string;
+  subheading?: string;
+  updates?: Update[];
+  showAll?: { label: string; href: string };
+  id?: string;
+}
+
+const {
+  theme = 'green',
+  heading = 'What’s new?',
+  subheading = 'We ship, ship and ship.',
+  updates = [
+    { date: 'Yesterday', title: 'Visual editing now works in sidebar previews too', tags: ['UI Improvement', 'Content Delivery API'], href: '#' },
+    { date: '4 Days Ago', title: 'Quick search by Record ID in the CMS', tags: ['UI Improvement', 'Content Delivery API'], href: '#' },
+    { date: 'A Week Ago', title: 'Real-time API is now more real(er?)-time', tags: ['UI Improvement', 'Content Delivery API'], href: '#' },
+    { date: '2 Weeks Ago', title: 'Turn off Content Link encoding for specific fields', tags: ['UI Improvement', 'Content Delivery API'], href: '#' },
+    { date: 'A Month Ago', title: 'A new layer of security: email verification', tags: ['UI Improvement', 'Security'], href: '#' },
+    { date: 'A Month Ago', title: 'Dark mode for your dashboard', tags: ['UI Improvement', 'New'], href: '#' },
+  ],
+  showAll = { label: 'Show All Product Updates', href: '#' },
+  id = 'product-updates',
+} = Astro.props;
+const headingId = `${id}-title`;
+---
+<section class="pus" data-theme={theme} id={id} aria-labelledby={headingId}>
+  <div class="pus__inner">
+    <h2 class="pus__heading t-h1" id={headingId}>
+      <span>{heading}</span>
+      <span class="pus__sub">{subheading}</span>
+    </h2>
+    <div class="pus__list-wrap">
+      <ul class="pus__list">
+        {updates.map((u) => (
+          <li class="pus__row"><ProductUpdateItem {...u} /></li>
+        ))}
+      </ul>
+      <CardCloudSync label={showAll.label} href={showAll.href} />
+    </div>
+  </div>
+</section>
+
+<style>
+  .pus {
+    background: var(--surface-inverse);
+    color: var(--text-on-inverse);
+    padding: var(--section-padding-y) var(--section-padding-x) 0;
+    overflow-x: clip; /* clips the full-bleed hover bands and dividers */
+  }
+  .pus__inner {
+    max-width: 1160px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-padding-x);
+  }
+  .pus__heading { display: flex; flex-direction: column; color: var(--text-on-inverse); }
+  @media (min-width: 768px) { .pus__heading { max-width: 611px; } }
+  .pus__sub { color: var(--text-on-inverse-muted); }
+
+  .pus__row { position: relative; isolation: isolate; }
+  /* Divider (Figma: 1320-wide rectangle, surface/accent-pressed) — full bleed */
+  .pus__row::after {
+    content: '';
+    position: absolute;
+    left: -100vw;
+    right: -100vw;
+    bottom: 0;
+    height: 1px;
+    background: var(--surface-accent-pressed);
+    pointer-events: none;
+    z-index: -1; /* under the row's hover band */
+  }
+  /* The hovered row's band sits above the neighbouring dividers */
+  .pus__row:hover { z-index: 1; }
+</style>

@@ -1,0 +1,94 @@
+---
+/**
+ * Figma: case-studies-section (breakpoint proposal) (3014:66627), Theme=Orange on the homepage.
+ * Instances: 1320 3029:66067 · 768 3030:20069 · 393 3030:21243 · 1152 3030:18875 · 1920 3030:17675.
+ *
+ * - Header: top padding section/padding-y, sides section/padding-x, content max 1160 centred.
+ *   h2 (Oracle/H1, max 900 wide) + button group, gap space/md (20).
+ *   Buttons are two plain links (not tabs): "Lets Talk!" = Button deep-on-white primary with
+ *   userpic; "All Case Studies →" = Button deep-on-white secondary with arrow. Hover via Button.
+ * - Header → grid gap: space/2xl (60) ≥768; section/padding-y (50) in the 393 frame.
+ * - Grid: max 1320 centred (cards carry their own section/padding-x side padding),
+ *   2 columns below 1152, 3 columns from 1152. No bottom padding (cards carry it).
+ * - Card density changes at 768 (inside CaseStudyCard). Card hover instant; no hover on touch.
+ */
+import Button from '../ui/Button.astro';
+import CaseStudyCard from '../cases/CaseStudyCard.astro';
+import type { Brand } from '../cases/CaseStudyLogo.astro';
+
+interface Props {
+  theme?: string;
+  heading?: string;
+  primary?: { label: string; href: string };
+  secondary?: { label: string; href: string };
+  cases?: { brand: Brand; text: string; href?: string }[];
+  id?: string;
+}
+const {
+  theme = 'orange',
+  heading = 'Trusted by top-notch companies to build work we’re both proud of.',
+  primary = { label: 'Lets Talk!', href: '#' },
+  secondary = { label: 'All Case Studies', href: '#' },
+  cases = [
+    { brand: 'Arduino', text: '92.5% less code and 50% faster time to market', href: '#' },
+    { brand: 'Netflix', text: 'A digital experience marking 10 years of Netflix France', href: '#' },
+    { brand: 'Freitag', text: 'A central database layer for 300K products in 5 locales', href: '#' },
+    { brand: 'Polestar', text: '250+ editors powering 28+ locales across 35 roles', href: '#' },
+    { brand: 'Hashicorp', text: '30 magazines powered from a single instance', href: '#' },
+    { brand: 'LOfficiel', text: '30 magazines powered from a single instance', href: '#' },
+  ],
+  id = 'case-studies',
+} = Astro.props;
+const headingId = `${id}-title`;
+---
+<section class="cases" data-theme={theme} id={id} aria-labelledby={headingId}>
+  <div class="cases__header">
+    <div class="cases__header-content">
+      <h2 class="cases__heading t-h1" id={headingId}>{heading}</h2>
+      <div class="cases__buttons">
+        <Button href={primary.href} appearance="deep-on-white" variant="primary" leading="userpic">
+          <span slot="leading" class="cases__userpic asset-placeholder" role="img" aria-label="IMAGE: userpic (20×20)"></span>
+          {primary.label}
+        </Button>
+        <Button href={secondary.href} appearance="deep-on-white" variant="secondary" arrow>{secondary.label}</Button>
+      </div>
+    </div>
+  </div>
+  <ul class="cases__grid">
+    {cases.map((c) => <li><CaseStudyCard {...c} /></li>)}
+  </ul>
+</section>
+
+<style>
+  .cases {
+    background: var(--surface-default);
+    color: var(--text-primary);
+    display: flex;
+    flex-direction: column;
+    gap: var(--section-padding-y);
+  }
+  @media (min-width: 768px) { .cases { gap: var(--space-2xl); } }
+  .cases__header { padding: var(--section-padding-y) var(--section-padding-x) 0; }
+  .cases__header-content {
+    max-width: 1160px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+  }
+  .cases__heading { max-width: 900px; }
+  .cases__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .cases__userpic { display: block; width: 100%; height: 100%; padding: 0; }
+
+  .cases__grid {
+    width: 100%;
+    max-width: 1320px;
+    margin-inline: auto;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  @media (min-width: 1152px) {
+    .cases__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+</style>

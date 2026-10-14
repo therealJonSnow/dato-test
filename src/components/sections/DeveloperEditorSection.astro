@@ -1,0 +1,167 @@
+---
+/**
+ * Figma: developer-editor-experience-section (breakpoint proposal) — component set 3026:11822
+ * (instances 3029:66059 / 3030:20061 / 3030:21235 / 3030:18867 / 3030:17667). Always Theme=Orange.
+ *
+ * Layout: mock-up (src/components/dev-editor/ProductMockup.astro) above a centred content column
+ * (max 678): one h2 (type/H1) made of two sentence spans, then two link buttons.
+ *  - Section padding: section/padding-x, section/padding-y. Mock-up → content gap space/md at
+ *    1152+, space/lg below. Headline → buttons space/md. Buttons gap space/2xs.
+ *  - Background surface/accent (orange), buttons appearance deep-on-light.
+ *
+ * Focus (runtime state, NOT a prop) — data-focus="developer|editor" on the section, default developer:
+ *  - Developer: sentence 1 text/primary, sentence 2 text/muted; "Developer Comfort" primary,
+ *    "Editor Happiness" secondary; code editor large/in front, CMS panel small.
+ *  - Editor: colours swap, button variants swap, CMS panel large, code editor small.
+ *  - ≥1152px with a fine hovering pointer: left half of the section = Developer, right half = Editor;
+ *    leaving the section keeps the last state.
+ *  - Below 1152px / touch: follows scroll — Developer while the top half of the section is at the
+ *    viewport centre, Editor once the bottom half is. No tap-to-switch.
+ *  - Everything transitions together: 300ms ease-out (--de-dur / --de-ease). prefers-reduced-motion:
+ *    instant switch, no movement.
+ *  - product-video: muted loop, plays only while in view; reduced motion → stays on first frame.
+ */
+import Button from '../ui/Button.astro';
+import ProductMockup from '../dev-editor/ProductMockup.astro';
+
+interface Props {
+  developerSentence?: string;
+  editorSentence?: string;
+  developerButton?: { label: string; href: string; arrow?: boolean };
+  editorButton?: { label: string; href: string; arrow?: boolean };
+  videoSrc?: string;
+  videoPoster?: string;
+  mockupLabel?: string;
+}
+const {
+  developerSentence = 'Fresh tools, predictable workflows and full control.',
+  editorSentence = 'Familiar editing, structured content and fewer bottlenecks.',
+  developerButton = { label: 'Developer Comfort', href: '#', arrow: true },
+  editorButton = { label: 'Editor Happiness', href: '#', arrow: true },
+  videoSrc,
+  videoPoster,
+  mockupLabel,
+} = Astro.props;
+---
+<section class="de" data-theme="orange" data-focus="developer" data-dev-editor>
+  <div class="de__inner">
+    <ProductMockup videoSrc={videoSrc} videoPoster={videoPoster} label={mockupLabel} />
+    <div class="de__content">
+      <h2 class="de__headline t-h1">
+        <span class="de__run de__run--dev">{developerSentence}</span>{' '}
+        <span class="de__run de__run--editor">{editorSentence}</span>
+      </h2>
+      <div class="de__buttons">
+        <Button href={developerButton.href} appearance="deep-on-light" variant="primary" arrow={developerButton.arrow ?? true} data-de-btn="developer">
+          {developerButton.label}
+        </Button>
+        <Button href={editorButton.href} appearance="deep-on-light" variant="secondary" arrow={editorButton.arrow ?? true} data-de-btn="editor">
+          {editorButton.label}
+        </Button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .de {
+    --de-dur: 300ms;
+    --de-ease: ease-out;
+    background: var(--surface-accent);
+    padding: var(--section-padding-y) var(--section-padding-x);
+    overflow: clip;
+  }
+  .de__inner {
+    max-width: 1160px;
+    margin-inline: auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-lg);
+  }
+  @media (min-width: 1152px) {
+    .de__inner { gap: var(--space-md); }
+  }
+  .de__content {
+    width: 100%;
+    max-width: 678px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-md);
+    text-align: center;
+  }
+  .de__headline { color: var(--text-primary); }
+  .de__run { transition: color var(--de-dur) var(--de-ease); }
+  .de[data-focus='developer'] .de__run--editor,
+  .de[data-focus='editor'] .de__run--dev { color: var(--text-muted); }
+  .de[data-focus='developer'] .de__run--dev,
+  .de[data-focus='editor'] .de__run--editor { color: var(--text-primary); }
+
+  .de__buttons { display: flex; flex-wrap: wrap; justify-content: center; gap: var(--space-2xs); }
+  .de__buttons :global(.btn) {
+    transition: background-color var(--de-dur) var(--de-ease), color var(--de-dur) var(--de-ease);
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .de { --de-dur: 0ms; }
+  }
+</style>
+
+<script>
+  const DESKTOP = '(min-width: 1152px) and (hover: hover) and (pointer: fine)';
+  const reduced = () => matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  function setFocus(section: HTMLElement, focus: 'developer' | 'editor') {
+    if (section.dataset.focus === focus) return;
+    section.dataset.focus = focus;
+    section.querySelectorAll<HTMLElement>('[data-de-btn]').forEach((btn) => {
+      const primary = btn.dataset.deBtn === focus;
+      btn.classList.toggle('btn--primary', primary);
+      btn.classList.toggle('btn--secondary', !primary);
+    });
+  }
+
+  function initSection(section: HTMLElement) {
+    const desktop = matchMedia(DESKTOP);
+
+    // Pointer mode (≥1152 with a hovering pointer)
+    section.addEventListener('pointermove', (e) => {
+      if (!desktop.matches || e.pointerType === 'touch') return;
+      const r = section.getBoundingClientRect();
+      setFocus(section, e.clientX < r.left + r.width / 2 ? 'developer' : 'editor');
+    });
+
+    // Scroll mode (below 1152 / touch)
+    let ticking = false;
+    const onScroll = () => {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(() => {
+        ticking = false;
+        if (desktop.matches) return;
+        const r = section.getBoundingClientRect();
+        const centre = window.innerHeight / 2;
+        setFocus(section, centre < r.top + r.height / 2 ? 'developer' : 'editor');
+      });
+    };
+    addEventListener('scroll', onScroll, { passive: true });
+    addEventListener('resize', onScroll);
+    onScroll();
+
+    // product-video: play while in view, first frame only with reduced motion
+    const videos = section.querySelectorAll<HTMLVideoElement>('video[data-de-video]');
+    if (videos.length) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach((entry) => {
+          const v = entry.target as HTMLVideoElement;
+          if (entry.isIntersecting && !reduced()) v.play().catch(() => {});
+          else v.pause();
+        });
+      }, { threshold: 0.1 });
+      videos.forEach((v) => io.observe(v));
+    }
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-dev-editor]').forEach(initSection);
+</script>

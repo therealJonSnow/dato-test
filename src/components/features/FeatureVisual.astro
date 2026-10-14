@@ -1,0 +1,67 @@
+---
+/**
+ * Figma: feature-visual (proposal) — component set 3011:65540, variants Feature=1…5
+ *
+ * Rules implemented
+ * - Transparent: the background colour comes from the section (Theme mode).
+ * - Scales with its container and keeps the 500×580 proportion (aspect-ratio).
+ * - The rounded rectangles ("image 472"…"image 476") are stand-ins for real screenshots.
+ *   They are rebuilt here as translucent blocks (30% opacity, radius/md) positioned in
+ *   percentages of the 500×580 frame. Fill = --surface-default of the active theme
+ *   (Figma binds Feature 1–4 to Green Light/50 and leaves Feature 5 unbound; see notes).
+ * - Real artwork: pass `src` (an image URL) and the blocks are replaced by an <img>.
+ */
+interface Props {
+  feature: 1 | 2 | 3 | 4 | 5;
+  label: string;
+  src?: string;
+  hidden?: boolean;
+  class?: string;
+}
+const { feature, label, src, hidden = false, class: className } = Astro.props;
+
+// [x, y, w, h] in the 500×580 frame, straight from the Figma variants
+const BLOCKS: Record<number, [number, number, number, number][]> = {
+  1: [[0, 12, 405, 219], [32, 255, 468, 313]],
+  2: [[1, 475, 246, 99], [125, 6, 374, 447]],
+  3: [[16, 14, 468, 207], [106, 263, 302, 56], [106, 350, 302, 56], [106, 430, 302, 56], [106, 510, 302, 56]],
+  4: [[0, 13, 174, 176], [0, 217, 174, 351], [197, 13, 303, 555]],
+  5: [[0, 13, 500, 169], [0, 206, 500, 169], [0, 399, 500, 169]],
+};
+const pct = (v: number, of: number) => `${((v / of) * 100).toFixed(3)}%`;
+const blocks = BLOCKS[feature].map(([x, y, w, h]) =>
+  `left:${pct(x, 500)};top:${pct(y, 580)};width:${pct(w, 500)};height:${pct(h, 580)}`,
+);
+---
+<div
+  class:list={['feature-visual', className]}
+  role="img"
+  aria-label={label}
+  aria-hidden={hidden ? 'true' : undefined}
+  data-feature={feature}
+>
+  {src ? (
+    <img src={src} alt="" loading="lazy" />
+  ) : (
+    blocks.map((style) => <span class="feature-visual__block" style={style}></span>)
+  )}
+</div>
+
+<style>
+  .feature-visual {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 500 / 580;
+  }
+  .feature-visual img { width: 100%; height: 100%; object-fit: contain; }
+  .feature-visual__block {
+    position: absolute;
+    border-radius: var(--radius-md);
+    background-color: var(--surface-default);
+    opacity: 0.3;
+    transition: background-color 300ms ease-in-out;
+  }
+  @media (prefers-reduced-motion: reduce) {
+    .feature-visual__block { transition: none; }
+  }
+</style>

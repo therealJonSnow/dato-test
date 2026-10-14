@@ -1,0 +1,144 @@
+---
+/**
+ * Figma: footer-links (1492:33921, variants Size=1320|1152|768|393|1920|2560), Theme=Purple
+ * Instances: 1320 3029:66071 · 768 3030:20073 · 393 3030:21247
+ * (No component description in Figma; layout measured from the variants.)
+ * - surface/inverse background; padding space/2xl top/bottom at every size,
+ *   section/padding-x sides; content max 1160 centred.
+ * - Six columns: ≥1152 one row, columns content-sized and spread (space-between);
+ *   768: 3-column grid; 393: 2-column grid; grid gaps space/2xl.
+ * - Group heading: Oracle/Subtitle Regular, text/on-inverse-soft. Links: Oracle/Subtitle Medium,
+ *   text/on-inverse. Lines 4px apart (space/3xs), groups in a column space/lg apart.
+ * - Status group uses the Green primitives (heading Green Light/350, link + dot Green Light/400)
+ *   regardless of theme.
+ * - Hover / focus: underline (not specified in Figma — matches nav-link).
+ */
+interface FooterLink { label: string; href: string }
+interface FooterGroup { heading?: string; links: FooterLink[]; status?: boolean }
+interface FooterColumn { groups: FooterGroup[] }
+interface Props {
+  columns?: FooterColumn[];
+  theme?: 'default' | 'orange' | 'green' | 'purple' | 'blue' | 'pink';
+}
+const l = (label: string, href = '#'): FooterLink => ({ label, href });
+const defaultColumns: FooterColumn[] = [
+  {
+    groups: [
+      { heading: 'Product', links: [l('Overview'), l('Developer Experience'), l('Editor Experience'), l('AI & Automation'), l('Features'), l('Integrations')] },
+      { links: [l('Pricing')] },
+      { links: [l('Privacy policy'), l('Cookie policy'), l('GDPR Compliance'), l('Terms of Service')] },
+    ],
+  },
+  {
+    groups: [{
+      heading: 'Features',
+      links: [l('Cache Tags'), l('Dark Mode'), l('Data Integrity'), l('Dynamic Layouts'), l('GraphQL'), l('Images API'), l('Multi-language'), l('Plugins'), l('Real-time API'), l('Schema Builder'), l('Structured Content'), l('Video API'), l('Visual Editing'), l('Workflow'), l('Worldwide CDN')],
+    }],
+  },
+  {
+    groups: [
+      { heading: 'Solutions', links: [l('By Need'), l('By Team'), l('Enterprise')] },
+      { heading: 'Compare', links: [l('vs Contentful'), l('vs Sanity'), l('vs Storyblok'), l('vs Strapi'), l('vs WordPress')] },
+    ],
+  },
+  {
+    groups: [
+      { heading: 'Developers', links: [l('Docs'), l('API Reference'), l('Community'), l('Support'), l('Product Updates')] },
+      { heading: 'Resources', links: [l('Blog'), l('Glossary'), l('Academy'), l('User Guides')] },
+    ],
+  },
+  {
+    groups: [
+      { heading: 'Partners', links: [l('Agency Directory'), l('Partner Showcase'), l('Become a Partner'), l('Tech Partners')] },
+      { heading: 'Customers', links: [l('Case Studies'), l('Casual Chats')] },
+    ],
+  },
+  {
+    groups: [
+      { heading: 'Company', links: [l('About'), l('Brand Assets'), l('Research Program'), l('Contact'), l('Security'), l('Legal')] },
+      { heading: 'Philosophy', links: [l('Independence'), l('Long-term Thinking'), l('Profit Sharing')] },
+      { heading: 'Status', status: true, links: [l('All systems normal', 'https://status.datocms.com')] },
+    ],
+  },
+];
+const { columns = defaultColumns, theme = 'purple' } = Astro.props;
+---
+<nav class="footer-links" data-theme={theme} aria-label="Footer">
+  <div class="footer-links__grid">
+    {columns.map((col) => (
+      <div class="footer-links__column">
+        {col.groups.map((g) => (
+          <div class:list={['footer-links__group', g.status && 'footer-links__group--status']}>
+            {g.heading && <p class="footer-links__heading t-subtitle-regular">{g.heading}</p>}
+            <ul class="footer-links__list">
+              {g.links.map((link) => (
+                <li>
+                  <a class="footer-links__link t-subtitle" href={link.href}>
+                    {g.status && <span class="footer-links__dot" aria-hidden="true"></span>}
+                    {link.label}
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+</nav>
+
+<style>
+  .footer-links {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-2xl) var(--section-padding-x);
+    background: var(--surface-inverse);
+    color: var(--text-on-inverse);
+  }
+  .footer-links__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-2xl);
+    flex: 1 1 0;
+    max-width: 1160px;
+  }
+  .footer-links__column,
+  .footer-links__group,
+  .footer-links__list { display: flex; flex-direction: column; }
+  .footer-links__column { gap: var(--space-lg); }
+  .footer-links__group,
+  .footer-links__list { gap: var(--space-3xs); }
+  .footer-links__list > li { display: flex; }
+  .footer-links__heading { color: var(--text-on-inverse-soft); }
+  .footer-links__link {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-xs);
+    color: var(--text-on-inverse);
+    white-space: nowrap;
+  }
+  .footer-links__link:hover,
+  .footer-links__link:focus-visible { text-decoration: underline; text-decoration-thickness: from-font; }
+  .footer-links__link:focus-visible { outline: 2px solid var(--border-on-inverse-strong); outline-offset: 2px; }
+
+  .footer-links__group--status .footer-links__heading { color: var(--color-green-light-350); }
+  .footer-links__group--status .footer-links__link { color: var(--color-green-light-400); }
+  .footer-links__dot {
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-full);
+    background: currentColor;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 768px) {
+    .footer-links__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  }
+  @media (min-width: 1152px) {
+    .footer-links__grid {
+      display: flex;
+      justify-content: space-between;
+      gap: var(--space-md);
+    }
+  }
+</style>

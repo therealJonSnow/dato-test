@@ -1,0 +1,77 @@
+---
+/**
+ * Figma: nav-dropdown (2883:11102, variants Menu=Product|Solutions|Customers|Partners|Developers)
+ * Desktop mega-menu panel opened from the header (≥1152 only).
+ * - Full-width surface/default background, absolutely positioned under the 82px header,
+ *   overlays the page (does not push it down). Instant, no animation.
+ * - Padding: space/2xs top, space/lg bottom, section/padding-x sides; content capped at 1160
+ *   and centred. Three 300px columns spread with flexible gaps (space-between).
+ * - Group headings: Oracle/Subtitle Medium, text/muted; links: nav-link (Oracle/H2).
+ *   Heading→links gap space/2xs, group→"All …" link gap space/md, groups in a column space/lg.
+ * - Fixed panel height 489 in Figma (all variants) → min-height 489.
+ * Open/close logic lives in Header.astro (hover, click, Esc, outside click, mouse leave).
+ */
+import NavLink from './NavLink.astro';
+import type { NavColumn } from './nav-data';
+
+interface Props { id: string; label: string; columns: NavColumn[] }
+const { id, label, columns } = Astro.props;
+---
+<div class="nav-dropdown" id={id} data-nav-panel hidden role="region" aria-label={label}>
+  <div class="nav-dropdown__columns">
+    {columns.map((col) => (
+      <div class="nav-dropdown__column">
+        {col.groups.map((g) => (
+          <div class="nav-dropdown__group">
+            <div class="nav-dropdown__group-main">
+              <p class="nav-dropdown__heading t-subtitle">{g.heading}</p>
+              <ul class="nav-dropdown__links">
+                {g.links.map((link) => (
+                  <li><NavLink href={link.href}>{link.label}</NavLink></li>
+                ))}
+              </ul>
+            </div>
+            {g.all && <NavLink href={g.all.href} all>{g.all.label}</NavLink>}
+          </div>
+        ))}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .nav-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    display: flex;
+    justify-content: center;
+    min-height: 489px;
+    padding: var(--space-2xs) var(--section-padding-x) var(--space-lg);
+    background: var(--surface-default);
+    color: var(--text-primary);
+  }
+  .nav-dropdown[hidden] { display: none; }
+  .nav-dropdown__columns {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: var(--space-lg);
+    flex: 1 1 0;
+    max-width: 1160px;
+  }
+  .nav-dropdown__column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-lg);
+    width: 300px;
+    flex-shrink: 0;
+  }
+  .nav-dropdown__group { display: flex; flex-direction: column; gap: var(--space-md); align-items: flex-start; }
+  .nav-dropdown__group-main { display: flex; flex-direction: column; gap: var(--space-2xs); }
+  .nav-dropdown__links { display: flex; flex-direction: column; gap: var(--space-2xs); }
+  .nav-dropdown__links > li { display: flex; }
+  .nav-dropdown__heading { color: var(--text-muted); }
+</style>

@@ -1,0 +1,108 @@
+---
+/**
+ * Figma: website-preview layer of developer-editor-experience-section (3026:11822),
+ * e.g. 3026:11389 (1152+, landscape) / 3026:11716 (768+, portrait).
+ * Its geometry does not change between Focus states. 1em = 1 drawn px of the mock-up
+ * (the parent sets font-size), so every value below is copied from Figma as em.
+ *  - video-wrapper → product-video: muted, looping MP4 with mix-blend-mode: screen. Plays only while
+ *    in view; with prefers-reduced-motion it stays on its first frame (script in the section).
+ *    No MP4 was exported → asset placeholder until `videoSrc` is passed.
+ *  - website-preview-text: orange title (one line, clipped, at 1152+; wraps at 768+) and a 30% subtitle.
+ */
+interface Props {
+  title?: string;
+  subtitle?: string;
+  videoSrc?: string;
+  videoPoster?: string;
+}
+const {
+  title = 'Infrastructure with human skills',
+  subtitle = 'Brand and Website for Human Interface',
+  videoSrc,
+  videoPoster,
+} = Astro.props;
+---
+<div class="wp">
+  <div class="wp__video">
+    {videoSrc ? (
+      <video class="wp__media" data-de-video src={videoSrc} poster={videoPoster} muted loop playsinline preload="metadata"></video>
+    ) : (
+      <div class="wp__media asset-placeholder">VIDEO: product-video (muted loop)</div>
+    )}
+  </div>
+  <div class="wp__text">
+    <div class="wp__box wp__box--title"><p class="wp__title">{title}</p></div>
+    <div class="wp__box wp__box--sub"><p class="wp__subtitle">{subtitle}</p></div>
+  </div>
+</div>
+
+<style>
+  .wp {
+    /* portrait (768+ and <768) — drawn 578.25 × 692.06 */
+    --wp-video-h: 353.3em;
+    --wp-title-size-n: 74.864em;
+    --wp-title-x: 54.8em;
+    --wp-title-y: 21.9em;
+    --wp-title-w: 512.6em;
+    --wp-title-ws: normal;
+    --wp-sub-size-n: 15.812em;
+    --wp-sub-x: 59.2em;
+    --wp-sub-y: 282.4em;
+    --wp-sub-w: 204.6em;
+    --wp-radius: 10.715em;
+    --wp-border: 1.099em;
+    width: 100%;
+    height: 100%;
+    position: relative;
+    overflow: hidden;
+    background: var(--color-orange-deep-800);
+    border: var(--wp-border) solid var(--color-purple-deep-500);
+    border-radius: 0 0 var(--wp-radius) var(--wp-radius);
+    color: var(--color-orange-light-400);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    line-height: 1;
+  }
+  @media (min-width: 1152px) {
+    /* landscape — drawn 623.08 × 341.88 */
+    .wp {
+      --wp-video-h: 162.752em;
+      --wp-title-size-n: 38.521em;
+      --wp-title-x: 42.52em;
+      --wp-title-y: 44.15em;
+      --wp-title-w: auto;
+      --wp-title-ws: nowrap;
+      --wp-sub-size-n: 17.053em;
+      --wp-sub-x: 44.01em;
+      --wp-sub-y: 98.46em;
+      --wp-sub-w: 207.05em;
+      --wp-radius: 11.556em;
+      --wp-border: 1.185em;
+    }
+  }
+  .wp__video { position: relative; height: var(--wp-video-h); overflow: hidden; }
+  .wp__media {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    mix-blend-mode: screen;
+  }
+  .wp__media.asset-placeholder { mix-blend-mode: normal; opacity: 0.35; font-size: 11px; }
+  .wp__text { position: relative; }
+  /* boxes stay at the base font-size (1em = 1 drawn px); only the text inside is resized */
+  .wp__box { position: absolute; }
+  .wp__box--title { left: var(--wp-title-x); top: var(--wp-title-y); width: var(--wp-title-w); }
+  .wp__box--sub { left: var(--wp-sub-x); top: var(--wp-sub-y); width: var(--wp-sub-w); }
+  .wp__title {
+    white-space: var(--wp-title-ws);
+    font-size: var(--wp-title-size-n);
+    letter-spacing: -0.05em;
+  }
+  .wp__subtitle {
+    font-size: var(--wp-sub-size-n);
+    letter-spacing: -0.03em;
+    opacity: 0.3;
+  }
+</style>

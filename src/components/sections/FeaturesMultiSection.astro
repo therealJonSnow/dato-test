@@ -1,0 +1,242 @@
+---
+/**
+ * Figma: features-multi-section (breakpoint proposal) — component set 3007:14711
+ * Instances: 1320 3029:66061 · 768 3030:20063 · 393 3030:21237 · 1152 3030:18869 · 1920 3030:17669
+ * Building blocks: feature-row (proposal) 3011:65510 → FeatureRow.astro,
+ *                  feature-visual (proposal) 3011:65540 → FeatureVisual.astro,
+ *                  button 1477:56042 → ui/Button.astro (Light on Deep, Secondary, arrow)
+ * States reference: Features-multi-section-hover-interaction 306:5409
+ *
+ * Rules implemented
+ * - Breakpoints: ≥1152 features left (surface/inverse) + image right (surface/accent), 50/50,
+ *   content max 500 hugging the centre seam, seam padding = section/padding-x.
+ *   768–1151: image on top (max 345 wide), features below. <768: same, image max 207 wide.
+ * - Theme per feature: each feature carries a theme; the section's data-theme is the active
+ *   feature's theme (1 Green, 2 Default, 3 Purple, 4 Orange, 5 Blue). Colours crossfade
+ *   300ms ease-in-out (background/color/border); instant with prefers-reduced-motion.
+ * - ≥1152 (hover-capable pointer): hovering a row — or the same vertical zone on the image —
+ *   activates it; the last one stays active when the pointer leaves. Focus/click also activates.
+ * - <1152: the image block is sticky (top 0) and the list scrolls below it. Card max-height
+ *   400, ratio 1000:1160, centred. Active = topmost row whose title is fully visible below
+ *   the sticky image; switching is instant. Clicking a row scrolls it right under the image.
+ * - Descriptions: shown for the active row at every width (393 frame wins over the note —
+ *   see docs/notes/features.md).
+ */
+import Button from '../ui/Button.astro';
+import FeatureRow from '../features/FeatureRow.astro';
+import FeatureVisual from '../features/FeatureVisual.astro';
+
+type Theme = 'default' | 'orange' | 'green' | 'purple' | 'blue' | 'pink';
+export interface Feature {
+  title: string;
+  description: string;
+  theme: Theme;
+  /** Optional real artwork (500×580); without it the Figma placeholder blocks are drawn */
+  image?: string;
+  imageLabel?: string;
+}
+interface Props {
+  id?: string;
+  heading?: string;
+  features?: Feature[];
+  cta?: { label: string; href: string };
+  activeIndex?: number;
+}
+
+const {
+  id = 'features',
+  heading = 'Features',
+  features = [
+    { title: 'GraphQL API', description: "Predictable queries, powerful tooling & an API that's a pleasure to work with.", theme: 'green' },
+    { title: 'Visual Editing', description: 'From your website to the right field in a click.', theme: 'default' },
+    { title: 'Structured Content', description: "Everything your writing needs, nothing it doesn't.", theme: 'purple' },
+    { title: 'Dynamic Layouts', description: 'The freedom of building blocks, without the mess.', theme: 'orange' },
+    { title: 'Localization', description: "Speak your audience's language, from one locale to hundreds.", theme: 'blue' },
+  ],
+  cta = { label: 'See All Features', href: '#' },
+  activeIndex = 0,
+} = Astro.props as Props;
+---
+<section
+  class="fms"
+  id={id}
+  data-theme={features[activeIndex].theme}
+  data-themes={JSON.stringify(features.map((f) => f.theme))}
+  aria-labelledby={`${id}-heading`}
+>
+  <h2 class="visually-hidden" id={`${id}-heading`}>{heading}</h2>
+
+  <div class="fms__features">
+    <div class="fms__list-wrap">
+      <ul class="fms__list">
+        {features.map((f, i) => (
+          <FeatureRow id={`${id}-row-${i + 1}`} index={i} title={f.title} description={f.description} active={i === activeIndex} />
+        ))}
+      </ul>
+      <Button href={cta.href} appearance="light-on-deep" variant="secondary" arrow class="fms__cta">{cta.label}</Button>
+    </div>
+  </div>
+
+  <div class="fms__media">
+    <div class="fms__visuals">
+      {features.map((f, i) => (
+        <FeatureVisual
+          feature={((i % 5) + 1) as 1 | 2 | 3 | 4 | 5}
+          src={f.image}
+          label={f.imageLabel ?? `IMAGE: feature-visual ${i + 1} — ${f.title} (500×580)`}
+          hidden={i !== activeIndex}
+          class={i === activeIndex ? 'is-active' : undefined}
+        />
+      ))}
+    </div>
+  </div>
+</section>
+
+<style>
+  .fms {
+    display: flex;
+    flex-direction: column;
+    overflow-anchor: none; /* rows grow/shrink while scrolling; no browser scroll anchoring */
+  }
+
+  /* ---- halves ---- */
+  .fms__features,
+  .fms__media {
+    padding: var(--section-padding-y) var(--section-padding-x);
+    transition: background-color 300ms ease-in-out;
+  }
+  .fms__features { background-color: var(--surface-inverse); }
+  .fms__media { background-color: var(--surface-accent); }
+
+  .fms__list-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-md); }
+  .fms__list { width: 100%; display: flex; flex-direction: column; gap: var(--space-md); }
+  .fms__list-wrap :global(.fms__cta) { transition: background-color 300ms ease-in-out, color 300ms ease-in-out; }
+
+  /* ---- visuals: stacked, only the active one shows ---- */
+  .fms__visuals { display: grid; margin-inline: auto; }
+  .fms__visuals > :global(.feature-visual) { grid-area: 1 / 1; opacity: 0; visibility: hidden; }
+  .fms__visuals > :global(.feature-visual.is-active) { opacity: 1; visibility: visible; }
+
+  /* ---- below 1152: image on top, sticky ---- */
+  @media (max-width: 1151.98px) {
+    .fms__media {
+      order: -1;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+    /* <768: image max 207 wide (= 240 tall) */
+    .fms__visuals { width: min(207px, 100%); }
+  }
+  @media (min-width: 768px) and (max-width: 1151.98px) {
+    /* card max-height 400 at 1000:1160 → 345 wide */
+    .fms__visuals { width: min(345px, 100%, calc(400px * 1000 / 1160)); }
+  }
+
+  /* ---- ≥1152: side by side, content hugging the seam ---- */
+  @media (min-width: 1152px) {
+    .fms { flex-direction: row; }
+    .fms__features,
+    .fms__media { flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+    .fms__features { align-items: flex-end; }
+    .fms__media { align-items: flex-start; }
+    .fms__list-wrap { width: 100%; max-width: 500px; }
+    .fms__visuals { width: 100%; max-width: 500px; margin-inline: 0; }
+    .fms__visuals > :global(.feature-visual) { transition: opacity 300ms ease-in-out, visibility 300ms; }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .fms__features, .fms__media, .fms__list-wrap :global(.fms__cta),
+    .fms__visuals > :global(.feature-visual) { transition: none !important; }
+  }
+</style>
+
+<script>
+  const DESKTOP = window.matchMedia('(min-width: 1152px)');
+
+  function init(section: HTMLElement) {
+    const themes: string[] = JSON.parse(section.dataset.themes || '[]');
+    const rows = Array.from(section.querySelectorAll<HTMLLIElement>('.feature-row'));
+    const triggers = rows.map((r) => r.querySelector<HTMLButtonElement>('.feature-row__trigger')!);
+    const descs = rows.map((r) => r.querySelector<HTMLElement>('.feature-row__desc')!);
+    const visuals = Array.from(section.querySelectorAll<HTMLElement>('.fms__visuals > .feature-visual'));
+    const media = section.querySelector<HTMLElement>('.fms__media')!;
+    let active = rows.findIndex((r) => r.classList.contains('is-active'));
+    if (active < 0) active = 0;
+
+    function setActive(i: number) {
+      if (i === active || i < 0 || i >= rows.length) return;
+      active = i;
+      section.dataset.theme = themes[i] || 'default';
+      rows.forEach((row, j) => {
+        const on = j === i;
+        row.classList.toggle('is-active', on);
+        triggers[j].setAttribute('aria-expanded', String(on));
+        descs[j].hidden = !on;
+      });
+      visuals.forEach((v, j) => {
+        const on = j === i;
+        v.classList.toggle('is-active', on);
+        if (on) v.removeAttribute('aria-hidden');
+        else v.setAttribute('aria-hidden', 'true');
+      });
+    }
+
+    // ---- ≥1152: hover a row, or the same vertical zone on the image ----
+    rows.forEach((row, i) => {
+      row.addEventListener('pointerenter', (e) => {
+        if (DESKTOP.matches && e.pointerType === 'mouse') setActive(i);
+      });
+    });
+    media.addEventListener('pointermove', (e) => {
+      if (!DESKTOP.matches || e.pointerType !== 'mouse') return;
+      // Zone of row i = its box extended to the midpoints of the gaps around it
+      const y = e.clientY;
+      for (let i = 0; i < rows.length; i++) {
+        const r = rows[i].getBoundingClientRect();
+        const prev = rows[i - 1]?.getBoundingClientRect();
+        const next = rows[i + 1]?.getBoundingClientRect();
+        const top = prev ? (prev.bottom + r.top) / 2 : r.top;
+        const bottom = next ? (r.bottom + next.top) / 2 : r.bottom;
+        if (y >= top && y < bottom) { setActive(i); break; }
+      }
+    });
+
+    // ---- keyboard / click ----
+    triggers.forEach((btn, i) => {
+      btn.addEventListener('focus', () => { if (DESKTOP.matches) setActive(i); });
+      btn.addEventListener('click', () => {
+        if (DESKTOP.matches) { setActive(i); return; }
+        // Below 1152: scroll the row right under the sticky image; the scroll handler activates it
+        const stickyBottom = media.getBoundingClientRect().height;
+        const top = rows[i].getBoundingClientRect().top + window.scrollY - stickyBottom;
+        const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        window.scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+        setActive(i);
+      });
+    });
+
+    // ---- <1152: sticky image + scroll ----
+    let ticking = false;
+    function onScroll() {
+      ticking = false;
+      if (DESKTOP.matches) return;
+      const sectionRect = section.getBoundingClientRect();
+      if (sectionRect.bottom < 0 || sectionRect.top > window.innerHeight) return;
+      const stickyBottom = media.getBoundingClientRect().bottom;
+      // topmost row whose title is fully visible below the image (1px tolerance)
+      let next = rows.length - 1;
+      for (let i = 0; i < rows.length; i++) {
+        if (triggers[i].getBoundingClientRect().top >= stickyBottom - 1) { next = i; break; }
+      }
+      setActive(next);
+    }
+    const requestTick = () => { if (!ticking) { ticking = true; requestAnimationFrame(onScroll); } };
+    window.addEventListener('scroll', requestTick, { passive: true });
+    window.addEventListener('resize', requestTick);
+    DESKTOP.addEventListener('change', requestTick);
+    requestTick();
+  }
+
+  document.querySelectorAll<HTMLElement>('.fms').forEach(init);
+</script>

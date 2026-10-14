@@ -1,0 +1,129 @@
+---
+/**
+ * Figma: partners-section (breakpoint proposal) (3019:66682), Theme=Blue on the homepage.
+ * Instances: 1320 3029:66068 · 768 3030:20070 · 393 3030:21244 · 1152 3030:18876 · 1920 3030:17676.
+ *
+ * - ≥1152: two equal halves. Left = surface/accent with the globe video, which fills its half
+ *   up to 660 wide and sits against the centre line. Right = surface/inverse text half,
+ *   padding section/padding-y × section/padding-x, content vertically centred, gap space/lg.
+ * - <1152: stacked — globe on top (full width, fixed 768:891 proportion), text below.
+ * - Text: eyebrow (Oracle/Body, text/on-inverse-soft), h2 list of regions (Oracle/H1,
+ *   text/on-inverse), subline (Oracle/Body, text/on-inverse-soft); gap space/2xs. Text column
+ *   max 378 on desktop. CTAs: Button light-on-deep primary + userpic, light-on-deep secondary + arrow.
+ * - GLOBE = looping video: muted, loop, playsinline, plays only while in view, paused off-screen;
+ *   prefers-reduced-motion → stays on the first frame. Until a video src is provided a
+ *   placeholder with the same box is rendered (the pixel/dot-matrix globe in Figma is a still of it).
+ * - Only interaction: button hover (from Button). No other motion.
+ */
+import Button from '../ui/Button.astro';
+
+interface Props {
+  theme?: string;
+  eyebrow?: string;
+  regions?: string[];
+  text?: string;
+  primary?: { label: string; href: string };
+  secondary?: { label: string; href: string };
+  videoSrc?: string;
+  videoPoster?: string;
+  id?: string;
+}
+const {
+  theme = 'blue',
+  eyebrow = 'Agency Partners',
+  regions = ['Europe (146)', 'North America (56)', 'Oceania (21)', 'Asia (17)', 'South America (7)', 'Africa (3)'],
+  text = 'We’ve enabled some seriously ambitious projects with some seriously creative partners. Read all about it.',
+  primary = { label: 'Become a Partner', href: '#' },
+  secondary = { label: 'Explore All Partners', href: '#' },
+  videoSrc,
+  videoPoster,
+  id = 'partners',
+} = Astro.props;
+const headingId = `${id}-title`;
+---
+<section class="partners" data-theme={theme} id={id} aria-labelledby={headingId}>
+  <div class="partners__media">
+    {videoSrc
+      ? <video class="partners__video" data-partners-video src={videoSrc} poster={videoPoster} muted loop playsinline preload="metadata" aria-hidden="true"></video>
+      : <div class="partners__video asset-placeholder" role="img" aria-label="VIDEO: looping pixel globe (660×704 desktop, 768×891 stacked)">VIDEO: globe loop (660×704)</div>}
+  </div>
+  <div class="partners__text">
+    <div class="partners__copy">
+      <p class="partners__eyebrow t-body">{eyebrow}</p>
+      <h2 class="partners__regions t-h1" id={headingId}>
+        <span class="visually-hidden">{eyebrow}: </span>
+        {regions.map((r) => <span class="partners__region">{r}</span>)}
+      </h2>
+      <p class="partners__sub t-body">{text}</p>
+    </div>
+    <div class="partners__ctas">
+      <Button href={primary.href} appearance="light-on-deep" variant="primary" leading="userpic">
+        <span slot="leading" class="partners__userpic asset-placeholder" role="img" aria-label="IMAGE: userpic (20×20)"></span>
+        {primary.label}
+      </Button>
+      <Button href={secondary.href} appearance="light-on-deep" variant="secondary" arrow>{secondary.label}</Button>
+    </div>
+  </div>
+</section>
+
+<script>
+  import { onVisibility, prefersReducedMotion } from '../../scripts/typewriter';
+  document.querySelectorAll<HTMLVideoElement>('video[data-partners-video]').forEach((video) => {
+    video.muted = true;
+    if (prefersReducedMotion()) {
+      video.pause();
+      video.currentTime = 0; // first frame only
+      return;
+    }
+    onVisibility(
+      video,
+      () => { video.play().catch(() => {}); },
+      () => video.pause(),
+    );
+  });
+</script>
+
+<style>
+  .partners {
+    display: grid;
+    grid-template-columns: 1fr;
+    background: var(--surface-inverse);
+  }
+  .partners__media {
+    display: flex;
+    justify-content: flex-end;
+    background: var(--surface-accent);
+  }
+  .partners__video {
+    display: block;
+    width: 100%;
+    aspect-ratio: 768 / 891;
+    object-fit: cover;
+    padding: 0;
+  }
+  .partners__text {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: var(--space-lg);
+    padding: var(--section-padding-y) var(--section-padding-x);
+    background: var(--surface-inverse);
+  }
+  .partners__copy { display: flex; flex-direction: column; gap: var(--space-2xs); }
+  .partners__eyebrow, .partners__sub { color: var(--text-on-inverse-soft); }
+  .partners__regions { display: flex; flex-direction: column; color: var(--text-on-inverse); }
+  .partners__ctas { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
+  .partners__userpic { display: block; width: 100%; height: 100%; padding: 0; }
+
+  @media (min-width: 1152px) {
+    .partners { grid-template-columns: 1fr 1fr; }
+    .partners__video {
+      max-width: 660px;
+      height: 100%;
+      aspect-ratio: auto;
+      min-height: 0;
+    }
+    .partners__copy { max-width: 378px; }
+  }
+</style>

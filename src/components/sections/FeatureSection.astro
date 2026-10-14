@@ -1,0 +1,187 @@
+---
+/**
+ * Figma: feature-section (layout proposal) — component set 2999:14413
+ *   (Breakpoint=1152+ 2990:14104, Breakpoint=<1152 2999:14394), Theme=Purple on the homepage.
+ * Instances: 1320 3029:66062 · 768 3030:20064 · 393 3030:21238 · 1152 3030:18870 · 1920 3030:17670
+ * Children: Code-snippet-preview 2614:18656 → features/CodeSnippetPreview.astro,
+ *           button 1477:56042 → ui/Button.astro (Deep on White, Secondary, Leading=Logos, arrow)
+ *
+ * Rules implemented
+ * - ≥1152: two equal halves. Left = Image-section (surface/accent) with the snippet card (max 500)
+ *   pushed to the centre seam; right = text (surface/default), vertically centred, max 500.
+ * - <1152: stacked — image section on top with the card centred, text below, left-aligned.
+ * - Padding = section/padding-x × section/padding-y; type from Sizing (follows the viewport).
+ * - Headline = h2 in Oracle/H1, subline Oracle/Body text/muted, 10px between, 30px to the button.
+ * - Framework logos in the button are raster crops → round placeholders (see notes).
+ */
+import Button from '../ui/Button.astro';
+import CodeSnippetPreview, { type Snippet } from '../features/CodeSnippetPreview.astro';
+
+type Theme = 'default' | 'orange' | 'green' | 'purple' | 'blue' | 'pink';
+interface Props {
+  id?: string;
+  theme?: Theme;
+  heading?: string;
+  body?: string;
+  cta?: { label: string; href: string; logos?: string[] };
+  snippets?: Snippet[];
+}
+
+const DEFAULT_SNIPPETS: Snippet[] = [
+  {
+    label: 'Next.js',
+    code: `import { [[performRequest]] } from 'lib/datocms';
+
+const [[PAGE_CONTENT_QUERY]] = \`
+    <<query Home>> {
+        <<homepage>> {
+            <<title>>
+            <<description>> {
+                <<value>>
+            }
+        }
+    }\`;
+
+export default async function [[Home]]() {
+    const { [[homepage]] } = await
+        [[performRequest]]([[PAGE_CONTENT_QUERY]]);
+
+    // <<[••]>>
+}`,
+  },
+  {
+    label: 'Nuxt',
+    code: `<script setup>
+const [[PAGE_CONTENT_QUERY]] = \`
+    <<query Home>> {
+        <<homepage>> {
+            <<title>>
+            <<description>> {
+                <<value>>
+            }
+        }
+    }\`;
+
+const { [[data]] } = await
+    [[useGraphqlQuery]]({ query: [[PAGE_CONTENT_QUERY]] });
+</script>
+
+<template>
+    <!-- <<[••]>> -->
+</template>`,
+  },
+  {
+    label: 'SvelteKit',
+    code: `import { [[performRequest]] } from '$lib/datocms';
+
+const [[PAGE_CONTENT_QUERY]] = \`
+    <<query Home>> {
+        <<homepage>> {
+            <<title>>
+            <<description>> {
+                <<value>>
+            }
+        }
+    }\`;
+
+export const [[load]] = async () => {
+    const { [[homepage]] } = await
+        [[performRequest]]([[PAGE_CONTENT_QUERY]]);
+
+    return { [[homepage]] };
+};`,
+  },
+  {
+    label: 'Astro',
+    code: `---
+import { [[performRequest]] } from '~/lib/datocms';
+
+const [[PAGE_CONTENT_QUERY]] = \`
+    <<query Home>> {
+        <<homepage>> {
+            <<title>>
+            <<description>> {
+                <<value>>
+            }
+        }
+    }\`;
+
+const { [[homepage]] } = await
+    [[performRequest]]([[PAGE_CONTENT_QUERY]]);
+---
+
+<!-- <<[••]>> -->`,
+  },
+];
+
+const {
+  id = 'integrations',
+  theme = 'purple',
+  heading = 'Integrate your framework with one line of code.',
+  body = 'Integrate easily with frameworks like React, Next.js, Astro, Nuxt, Remix, and SvelteKit with our official integration guides.',
+  cta = { label: 'Explore Integrations', href: '#', logos: ['Next.js', 'Nuxt', 'Astro', 'Remix', 'Vue', 'Svelte'] },
+  snippets = DEFAULT_SNIPPETS,
+} = Astro.props as Props;
+---
+<section class="fs" id={id} data-theme={theme} aria-labelledby={`${id}-heading`}>
+  <div class="fs__media">
+    <CodeSnippetPreview id={`${id}-code`} snippets={snippets} label="Framework" />
+  </div>
+  <div class="fs__text">
+    <div class="fs__copy">
+      <h2 class="t-h1 fs__heading" id={`${id}-heading`}>{heading}</h2>
+      <p class="t-body fs__body">{body}</p>
+    </div>
+    <Button href={cta.href} appearance="deep-on-white" variant="secondary" leading="logos" arrow>
+      <Fragment slot="leading">
+        {(cta.logos ?? []).map((name) => (
+          <span class="fs__logo" title={name}></span>
+        ))}
+      </Fragment>
+      {cta.label}
+    </Button>
+  </div>
+</section>
+
+<style>
+  .fs { display: flex; flex-direction: column; }
+  .fs__media,
+  .fs__text { padding: var(--section-padding-y) var(--section-padding-x); }
+
+  .fs__media {
+    background: var(--surface-accent);
+    display: flex;
+    justify-content: center;
+  }
+  .fs__text {
+    background: var(--surface-default);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-lg);
+  }
+  .fs__copy { display: flex; flex-direction: column; gap: var(--space-2xs); }
+  .fs__heading { color: var(--text-primary); }
+  .fs__body { color: var(--text-muted); }
+
+  /* Raster framework logos (placeholder): 20px circles, white ring, -10px overlap */
+  .fs__logo {
+    display: block;
+    width: 20px;
+    height: 20px;
+    border-radius: var(--radius-full);
+    border: 0.84px solid var(--color-neutral-white);
+    background: var(--surface-inverse);
+    margin-right: -10px;
+  }
+  .fs__logo:last-child { margin-right: 0; }
+
+  @media (min-width: 1152px) {
+    .fs { flex-direction: row; }
+    .fs__media,
+    .fs__text { flex: 1 1 0; min-width: 0; }
+    .fs__media { justify-content: flex-end; align-items: center; }
+    .fs__text { justify-content: center; }
+    .fs__copy { max-width: 500px; }
+  }
+</style>

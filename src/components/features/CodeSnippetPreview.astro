@@ -1,0 +1,150 @@
+---
+/**
+ * Figma: Code-snippet-preview — component set 2614:18656 (Size=1320 2614:18112, Size=393 2614:18657)
+ *
+ * Rules implemented
+ * - Card: surface/inverse fill, radius/lg, 580 tall, max 500 wide, clips its content.
+ * - Size=1320 (≥768): 30px padding, 20px between tabs and code, 20px between line numbers and code.
+ *   Size=393 (<768): 20px padding, 4px between tabs, 20px tab→code, 10px numbers→code. Tab text = Subtitle (size follows Sizing).
+ * - Selector = real tabs (role=tablist, arrow keys / Home / End). Active pill: surface/accent-subtle
+ *   fill + text/on-inverse; inactive: text/on-inverse-soft.
+ * - Code = real text in Mono/Code Small. Colours: base text/on-inverse-soft, identifiers [[x]]
+ *   text/on-inverse-strong, GraphQL fields / comments <<x>> text/on-inverse.
+ *   Line numbers are a separate aria-hidden column. Long lines scroll horizontally (393 clips in Figma).
+ */
+export interface Snippet {
+  label: string;
+  /** Source; mark identifiers with [[x]] and highlighted tokens with <<x>> */
+  code: string;
+}
+interface Props {
+  id: string;
+  snippets: Snippet[];
+  label?: string;
+}
+const { id, snippets, label = 'Code example' } = Astro.props;
+
+type Tok = { t: string; k: 'base' | 'id' | 'kw' };
+function tokenize(line: string): Tok[] {
+  const out: Tok[] = [];
+  const re = /\[\[(.+?)\]\]|<<(.+?)>>/g;
+  let last = 0;
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(line))) {
+    if (m.index > last) out.push({ t: line.slice(last, m.index), k: 'base' });
+    out.push(m[1] !== undefined ? { t: m[1], k: 'id' } : { t: m[2], k: 'kw' });
+    last = re.lastIndex;
+  }
+  if (last < line.length) out.push({ t: line.slice(last), k: 'base' });
+  return out;
+}
+const panels = snippets.map((s) => s.code.replace(/^\n|\n$/g, '').split('\n').map(tokenize));
+---
+<div class="csp" data-csp>
+  <div class="csp__tabs" role="tablist" aria-label={label}>
+    {snippets.map((s, i) => (
+      <button
+        type="button"
+        role="tab"
+        class="csp__tab t-subtitle"
+        id={`${id}-tab-${i}`}
+        aria-selected={i === 0 ? 'true' : 'false'}
+        aria-controls={`${id}-panel-${i}`}
+        tabindex={i === 0 ? 0 : -1}
+      >{s.label}</button>
+    ))}
+  </div>
+  {panels.map((lines, i) => (
+    <div class="csp__panel" role="tabpanel" id={`${id}-panel-${i}`} aria-labelledby={`${id}-tab-${i}`} hidden={i !== 0}>
+      <pre class="csp__nums t-code-small" aria-hidden="true">{lines.map((_, n) => String(n + 1).padStart(2, ' ')).join('\n')}</pre>
+      <pre class="csp__code t-code-small" tabindex="0"><code>{lines.map((toks, n) => (
+        <Fragment>{toks.map((tk) => tk.k === 'base' ? tk.t : <span class={`csp__${tk.k}`}>{tk.t}</span>)}{n < lines.length - 1 ? '\n' : ''}</Fragment>
+      ))}</code></pre>
+    </div>
+  ))}
+</div>
+
+<style>
+  .csp {
+    --csp-pad: var(--space-md);
+    --csp-num-gap: var(--space-2xs);
+    width: 100%;
+    max-width: 500px;
+    min-height: 580px;
+    padding: var(--csp-pad);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-md);
+    background: var(--surface-inverse);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+  }
+  @media (min-width: 768px) {
+    .csp { --csp-pad: var(--space-lg); --csp-num-gap: var(--space-md); }
+  }
+
+  .csp__tabs { display: flex; gap: var(--space-3xs); align-items: center; }
+  @media (min-width: 768px) { .csp__tabs { gap: var(--space-xs); } }
+  .csp__tab {
+    padding: var(--space-xs) var(--space-sm);
+    border-radius: var(--radius-full);
+    color: var(--text-on-inverse-soft);
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: background-color 150ms ease-in-out, color 150ms ease-in-out;
+  }
+  @media (hover: hover) {
+    .csp__tab:hover { color: var(--text-on-inverse); }
+  }
+  .csp__tab[aria-selected='true'] { background: var(--surface-accent-subtle); color: var(--text-on-inverse); }
+  .csp__tab:focus-visible { outline: 2px solid var(--text-on-inverse); outline-offset: 2px; }
+
+  .csp__panel { display: flex; gap: var(--csp-num-gap); min-width: 0; }
+  .csp__panel[hidden] { display: none; }
+  .csp pre { margin: 0; font-family: var(--font-mono); }
+  .csp code { font: inherit; }
+  .csp__nums { color: var(--text-on-inverse-soft); flex-shrink: 0; user-select: none; }
+  .csp__code {
+    color: var(--text-on-inverse-soft);
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    border-radius: var(--radius-md);
+  }
+  .csp__code::-webkit-scrollbar { display: none; }
+  .csp__code:focus-visible { outline: 2px solid var(--text-on-inverse); outline-offset: 2px; }
+  .csp__id { color: var(--text-on-inverse-strong); }
+  .csp__kw { color: var(--text-on-inverse); }
+
+  @media (prefers-reduced-motion: reduce) {
+    .csp__tab { transition: none; }
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-csp]').forEach((root) => {
+    const tabs = Array.from(root.querySelectorAll<HTMLButtonElement>('[role="tab"]'));
+    const select = (i: number, focus = false) => {
+      tabs.forEach((t, j) => {
+        const on = i === j;
+        t.setAttribute('aria-selected', String(on));
+        t.tabIndex = on ? 0 : -1;
+        const panel = root.querySelector<HTMLElement>(`#${t.getAttribute('aria-controls')}`);
+        if (panel) panel.hidden = !on;
+      });
+      if (focus) tabs[i].focus();
+    };
+    tabs.forEach((t, i) => {
+      t.addEventListener('click', () => select(i));
+      t.addEventListener('keydown', (e) => {
+        const map: Record<string, number> = {
+          ArrowRight: (i + 1) % tabs.length,
+          ArrowLeft: (i - 1 + tabs.length) % tabs.length,
+          Home: 0,
+          End: tabs.length - 1,
+        };
+        if (e.key in map) { e.preventDefault(); select(map[e.key], true); }
+      });
+    });
+  });
+</script>

@@ -1,0 +1,50 @@
+---
+/**
+ * Figma: card-cloud-sync (306:6285) — State=Default|Hover. Used as the
+ * "Show All Product Updates" link at the bottom of the product-updates section.
+ *
+ * - Right-aligned Oracle/H1 label, 30px block padding, 10px side padding (0 below 768 —
+ *   product-updates-section note: "Show All card has no side padding" at <768).
+ * - HOVER (Figma: instant CHANGE_TO, no transition): full-bleed surface/accent band behind
+ *   the card, text → text/primary. Only on hover-capable pointers (no tap-to-hover).
+ *   The band escapes the column; the parent section clips it.
+ */
+interface Props {
+  label: string;
+  href: string;
+}
+const { label, href } = Astro.props;
+---
+<a class="ccs" href={href}><span class="ccs__label">{label}</span></a>
+
+<style>
+  .ccs {
+    position: relative;
+    display: flex;
+    justify-content: flex-end;
+    padding-block: var(--space-lg);
+    color: var(--text-on-inverse);
+  }
+  .ccs::before {
+    content: '';
+    position: absolute;
+    inset: 0 -100vw;
+    background: var(--surface-accent);
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ccs__label {
+    position: relative;
+    text-align: right;
+    font: 500 var(--type-h1)/1 var(--font-sans);
+    letter-spacing: -0.04em;
+  }
+  @media (min-width: 768px) {
+    .ccs { padding-inline: var(--space-2xs); }
+  }
+  @media (hover: hover) {
+    .ccs:hover::before { opacity: 1; }
+    .ccs:hover { color: var(--text-primary); }
+  }
+  .ccs:focus-visible { outline: 2px solid var(--border-on-inverse-strong); outline-offset: 4px; }
+</style>

@@ -1,0 +1,36 @@
+---
+/**
+ * Figma: Footer-cta (2377:38619, variants State=Default|Hover)
+ * - Oracle/H1, text/on-inverse, right-aligned, on surface/inverse.
+ * - Padding section/padding-x sides, space/xl top/bottom; content capped at 1320 and centred
+ *   (the full-width surface/inverse band is footer-cta-band in FooterAnimationSection).
+ * - Hover (and keyboard focus): the "→" in front of the text appears (opacity 0 → 1).
+ *   Prototype transition is "none" → instant. The arrow always takes its space, so nothing moves.
+ */
+interface Props { text: string; href: string }
+const { text, href } = Astro.props;
+---
+<a class="footer-cta t-h1" href={href}>
+  <span class="footer-cta__arrow" aria-hidden="true">→</span>
+  <span class="footer-cta__text">{text}</span>
+</a>
+
+<style>
+  .footer-cta {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-2xs);
+    flex: 1 1 0;
+    max-width: 1320px;
+    padding: var(--space-xl) var(--section-padding-x);
+    background: var(--surface-inverse);
+    color: var(--text-on-inverse);
+    text-align: right;
+    white-space: nowrap; /* Figma: single line at every width */
+  }
+  .footer-cta__arrow { opacity: 0; flex-shrink: 0; }
+  .footer-cta:hover .footer-cta__arrow,
+  .footer-cta:focus-visible .footer-cta__arrow { opacity: 1; }
+  .footer-cta:focus-visible { outline: 2px solid var(--border-on-inverse-strong); outline-offset: -4px; }
+</style>

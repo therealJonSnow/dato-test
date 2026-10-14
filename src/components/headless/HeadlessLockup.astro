@@ -1,0 +1,109 @@
+---
+/**
+ * Figma: TEST/headless-cms-lockup (2982:14064) — [label] [D] [list].
+ * - Sizes come from the component-specific test/headless-* Sizing variables, implemented as scoped
+ *   custom properties in HeadlessCmsSection.astro (--hl-*). Display size and the D are
+ *   container-relative (cqi of the section's content column): text 7.3cqi (mobile 9.855cqi),
+ *   D 5.3cqi (mobile 7.2cqi).
+ * - Label: "Single Source" ≥768, "Source" below (show-full-label / show-short-label).
+ * - Label and list share the free space equally, so the D stays centred.
+ * - List: the active item is centred at full opacity, the others at 30%. Static state = Chatbot.
+ * - MOTION: the list moves with a CSS transform, one item per step (script in the section).
+ *   The cycle is rendered three times so the loop can jump back by one cycle invisibly.
+ * - Decorative (aria-hidden); the section provides the text for screen readers.
+ */
+import DSymbol from '../../assets/svg/headless/d-symbol.svg';
+
+interface Props {
+  label?: string;
+  shortLabel?: string;
+  items?: string[];
+  activeItem?: string;
+}
+const {
+  label = 'Single Source',
+  shortLabel = 'Source',
+  items = ['Kiosk', 'Watch', 'Alexa', 'Store', 'Chatbot', 'Website', 'App', 'Smart TV', 'Car Widget'],
+  activeItem = 'Chatbot',
+} = Astro.props;
+const copies = 3;
+const start = Math.max(0, items.indexOf(activeItem)) + items.length; // middle copy
+const rendered = Array.from({ length: copies }, () => items).flat();
+---
+<div class="lockup" aria-hidden="true">
+  <div class="lockup__label">
+    <span class="lockup__label-full">{label}</span>
+    <span class="lockup__label-short">{shortLabel}</span>
+  </div>
+  <div class="lockup__symbol-wrap"><DSymbol class="lockup__symbol" /></div>
+  <div class="lockup__list-wrap">
+    <ul class="lockup__list" data-hl-list data-count={items.length} data-start={start} style={`--i: ${start}`}>
+      {rendered.map((item, i) => <li class:list={['lockup__item', i === start && 'is-active']}>{item}</li>)}
+    </ul>
+  </div>
+</div>
+
+<style>
+  .lockup {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    gap: var(--hl-lockup-gap);
+    padding: var(--hl-lockup-pad-top) var(--hl-lockup-pad-right) var(--hl-lockup-pad-bottom) var(--hl-lockup-pad-left);
+    color: var(--text-on-inverse);
+    font-family: var(--font-sans);
+    font-weight: 500;
+    line-height: 1;
+    pointer-events: none;
+  }
+  .lockup__label {
+    flex: 1 1 0;
+    min-width: 0;
+    display: flex;
+    justify-content: flex-end;
+    font-size: var(--hl-display-size);
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+    text-align: right;
+  }
+  .lockup__label-full { display: var(--hl-show-full-label); }
+  .lockup__label-short { display: var(--hl-show-short-label); }
+
+  .lockup__symbol-wrap { flex: none; padding-bottom: var(--hl-symbol-lift); }
+  .lockup__symbol {
+    display: block;
+    width: var(--hl-symbol-size);
+    height: auto;
+    aspect-ratio: 61.97 / 62.37;
+  }
+
+  .lockup__list-wrap {
+    flex: 1 1 0;
+    min-width: 0;
+    align-self: stretch;
+    position: relative;
+  }
+  .lockup__list {
+    --step: calc(1em + var(--hl-list-gap));
+    position: absolute;
+    left: 0;
+    top: 50%;
+    display: flex;
+    flex-direction: column;
+    gap: var(--hl-list-gap);
+    padding-left: var(--hl-list-offset);
+    font-size: var(--hl-display-size);
+    letter-spacing: -0.05em;
+    white-space: nowrap;
+    transform: translateY(calc(-0.5em - var(--i) * var(--step)));
+    transition: transform var(--hl-move-dur) var(--hl-move-ease);
+  }
+  .lockup__list.no-transition,
+  .lockup__list.no-transition .lockup__item { transition: none; }
+  .lockup__item {
+    opacity: 0.3;
+    transition: opacity var(--hl-move-dur) var(--hl-move-ease);
+  }
+  .lockup__item.is-active { opacity: 1; }
+</style>

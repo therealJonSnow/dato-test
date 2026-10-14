@@ -1,0 +1,63 @@
+---
+/**
+ * Figma: footer-legal (1545:36015, variants Size=…), Theme=Purple; uses dato-logo 14:64 (long)
+ * Instances: 1320 3029:66072 · 768 3030:20074 · 393 3030:21248
+ * - surface/inverse background, padding space/lg top/bottom, section/padding-x sides,
+ *   content max 1160 centred; logo left (152px wide, surface/accent), legal text right.
+ * - Text: Oracle/Caption; e-mail in text/on-inverse, rest in text/on-inverse-soft
+ *   (Purple Light/350). Wraps and stays right-aligned on narrow screens (393).
+ */
+import DatoLogo from '../ui/DatoLogo.astro';
+
+interface Props {
+  email?: string;
+  legal?: string;
+  homeHref?: string;
+  theme?: 'default' | 'orange' | 'green' | 'purple' | 'blue' | 'pink';
+}
+const {
+  email = 'support@datocms.com',
+  legal = '©2026 Dato srl, all rights reserved  P.IVA 06969620480',
+  homeHref = '/',
+  theme = 'purple',
+} = Astro.props;
+---
+<div class="footer-legal" data-theme={theme}>
+  <div class="footer-legal__content">
+    <a class="footer-legal__logo" href={homeHref} aria-label="DatoCMS home">
+      <DatoLogo version="long" width={152} label="" />
+    </a>
+    <p class="footer-legal__text t-caption">
+      <a class="footer-legal__email" href={`mailto:${email}`}>{email}</a>
+      <span class="footer-legal__legal">{' '}{legal}</span>
+    </p>
+  </div>
+</div>
+
+<style>
+  .footer-legal {
+    display: flex;
+    justify-content: center;
+    padding: var(--space-lg) var(--section-padding-x);
+    background: var(--surface-inverse);
+  }
+  .footer-legal__content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-md);
+    flex: 1 1 0;
+    max-width: 1160px;
+  }
+  .footer-legal__logo { display: block; color: var(--surface-accent); }
+  .footer-legal__text {
+    text-align: right;
+    white-space: pre-wrap;
+    color: var(--text-on-inverse-soft);
+  }
+  .footer-legal__email { color: var(--text-on-inverse); }
+  .footer-legal__email:hover,
+  .footer-legal__email:focus-visible { text-decoration: underline; }
+  .footer-legal__logo:focus-visible,
+  .footer-legal__email:focus-visible { outline: 2px solid var(--border-on-inverse-strong); outline-offset: 2px; }
+</style>

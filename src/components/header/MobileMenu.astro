@@ -1,0 +1,137 @@
+---
+/**
+ * Figma: mobile-menu (2883:11432, variants Section=None|Product|Solutions|Customers|Partners|Developers)
+ * Shown under the header when Menu = Open (below 1152px only).
+ * - Full width, absolutely positioned under the 82px header, surface/default background.
+ *   Padding space/lg top/bottom, section/padding-x sides (lines up with the logo at 768 and 393).
+ * - Accordion: tap a section heading to expand it, tap again to collapse. Only one section is
+ *   open at a time. Philosophy and Pricing are plain links. Instant, no animation.
+ * - Section headings Oracle/H1 with a +/− icon; rows separated by 1px lines; gap space/lg.
+ * - Expanded content: 2-column grid (column gap space/md, row gap space/xl); each group is
+ *   one cell: muted Oracle/Subtitle heading + nav-links (Oracle/H2), gap space/sm.
+ * - The menu scrolls inside itself when taller than the screen (max-height set by Header.astro).
+ * Open/close + body scroll lock live in Header.astro; accordion logic is in this file.
+ */
+import NavLink from './NavLink.astro';
+import type { NavItem } from './nav-data';
+
+interface Props { id: string; items: NavItem[] }
+const { id, items } = Astro.props;
+---
+<div class="mobile-menu" id={id} data-mobile-menu hidden>
+  <ul class="mobile-menu__list">
+    {items.map((item) => (
+      <li class="mobile-menu__section">
+        {item.columns ? (
+          <>
+            <button
+              type="button"
+              class="mobile-menu__toggle t-h1"
+              aria-expanded="false"
+              aria-controls={`mm-${item.id}`}
+              data-mm-toggle
+            >
+              <span>{item.label}</span>
+              <svg class="mobile-menu__icon mobile-menu__icon--plus" width="17" height="30" viewBox="0 0 17 30" aria-hidden="true" focusable="false"><path d="M6.37 21.53V16.34H1V13.19H6.37V8H9.67V13.19H15.04V16.34H9.67V21.53H6.37Z" fill="currentColor" /></svg>
+              <svg class="mobile-menu__icon mobile-menu__icon--minus" width="17" height="30" viewBox="0 0 17 30" aria-hidden="true" focusable="false"><path d="M4 16.15V13H12.16V16.15H4Z" fill="currentColor" /></svg>
+            </button>
+            <div class="mobile-menu__panel" id={`mm-${item.id}`} hidden>
+              {item.columns.flatMap((c) => c.groups).map((g) => (
+                <div class="mobile-menu__group">
+                  <p class="mobile-menu__heading t-subtitle">{g.heading}</p>
+                  <ul class="mobile-menu__links">
+                    {g.links.map((link) => (
+                      <li><NavLink href={link.href}>{link.label}</NavLink></li>
+                    ))}
+                  </ul>
+                  {g.all && <NavLink href={g.all.href} all>{g.all.label}</NavLink>}
+                </div>
+              ))}
+            </div>
+          </>
+        ) : (
+          <a class="mobile-menu__link t-h1" href={item.href}>{item.label}</a>
+        )}
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .mobile-menu {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    max-height: var(--mobile-menu-max-h, calc(100dvh - 82px));
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: var(--space-lg) var(--section-padding-x);
+    background: var(--surface-default);
+    color: var(--text-primary);
+  }
+  .mobile-menu[hidden] { display: none; }
+  .mobile-menu__list { display: flex; flex-direction: column; }
+  .mobile-menu__section { display: flex; flex-direction: column; gap: var(--space-lg); }
+  /* 1px separator between rows (Figma separator: Brown/700 line → themed text/muted) */
+  .mobile-menu__section + .mobile-menu__section {
+    margin-top: var(--space-lg);
+    padding-top: var(--space-lg);
+    border-top: 1px solid var(--text-muted);
+  }
+  .mobile-menu__toggle,
+  .mobile-menu__link {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-lg);
+    width: 100%;
+    text-align: left;
+    color: var(--text-primary);
+  }
+  .mobile-menu__icon { flex-shrink: 0; }
+  .mobile-menu__icon--minus,
+  .mobile-menu__toggle[aria-expanded='true'] .mobile-menu__icon--plus { display: none; }
+  .mobile-menu__toggle[aria-expanded='true'] .mobile-menu__icon--minus { display: block; }
+  .mobile-menu__toggle:focus-visible,
+  .mobile-menu__link:focus-visible { outline: 2px solid var(--border-strong); outline-offset: 2px; }
+  @media (hover: hover) {
+    .mobile-menu__link:hover span, .mobile-menu__link:hover { text-decoration: underline; text-decoration-thickness: from-font; }
+  }
+
+  .mobile-menu__panel {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: var(--space-md);
+    row-gap: var(--space-xl);
+    align-items: start;
+  }
+  .mobile-menu__panel[hidden] { display: none; }
+  .mobile-menu__group,
+  .mobile-menu__links { display: flex; flex-direction: column; gap: var(--space-sm); align-items: flex-start; }
+  .mobile-menu__links > li { display: flex; }
+  .mobile-menu__heading { color: var(--text-muted); }
+  .mobile-menu__group :global(.nav-link--all) { white-space: normal; }
+</style>
+
+<script>
+  // Accordion: one section open at a time, tap again to collapse. Instant.
+  document.querySelectorAll<HTMLElement>('[data-mobile-menu]').forEach((menu) => {
+    const toggles = [...menu.querySelectorAll<HTMLButtonElement>('[data-mm-toggle]')];
+    const set = (btn: HTMLButtonElement, open: boolean) => {
+      btn.setAttribute('aria-expanded', String(open));
+      const panel = document.getElementById(btn.getAttribute('aria-controls')!);
+      if (panel) panel.hidden = !open;
+    };
+    toggles.forEach((btn) =>
+      btn.addEventListener('click', () => {
+        const open = btn.getAttribute('aria-expanded') !== 'true';
+        toggles.forEach((b) => set(b, false));
+        set(btn, open);
+      }),
+    );
+    // Header.astro dispatches this when the menu closes, so it reopens collapsed.
+    menu.addEventListener('mobile-menu:reset', () => toggles.forEach((b) => set(b, false)));
+  });
+</script>

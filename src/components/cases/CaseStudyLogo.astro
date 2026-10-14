@@ -1,0 +1,64 @@
+---
+/**
+ * Figma: Case-Study-Logo (2242:30430) — variant Brand=… (14 brands; 6 used on the homepage).
+ * 220×30 frame (in the card: up to 280 wide × 30 tall), the brand vector left-aligned and
+ * vertically centred. Vectors exported via the plugin API (SVG_STRING) with fills turned
+ * into currentColor, so the card controls the colour (text/primary → text/on-inverse on hover).
+ * Natural vector size is kept; the compact card (<768) scales it to 2/3 (30 → 20 box).
+ * Brands not exported yet render their name as text (see docs/notes/proof.md).
+ */
+import Arduino from '../../assets/svg/case-logos/arduino.svg';
+import Netflix from '../../assets/svg/case-logos/netflix.svg';
+import Freitag from '../../assets/svg/case-logos/freitag.svg';
+import Polestar from '../../assets/svg/case-logos/polestar.svg';
+import Hashicorp from '../../assets/svg/case-logos/hashicorp.svg';
+import LOfficiel from '../../assets/svg/case-logos/lofficiel.svg';
+
+export type Brand =
+  | 'Arduino' | 'Netflix' | 'Hashicorp' | 'Freitag' | 'Polestar' | 'LOfficiel'
+  | 'Wonderland' | 'Matter Supply' | 'Deltares' | "Chilly's" | 'Le Pain Quotidien'
+  | 'Eurac research' | 'Oberlo' | 'Belletrina';
+
+interface Props { brand: Brand }
+const { brand } = Astro.props;
+
+// [component, natural height in px] — heights from the Figma vectors
+const logos: Partial<Record<Brand, [any, number, string]>> = {
+  Arduino: [Arduino, 26, 'Arduino'],
+  Netflix: [Netflix, 28, 'Netflix'],
+  Freitag: [Freitag, 30, 'Freitag'],
+  Polestar: [Polestar, 30, 'Polestar'],
+  Hashicorp: [Hashicorp, 34, 'HashiCorp'],
+  LOfficiel: [LOfficiel, 30, 'L’Officiel'],
+};
+const entry = logos[brand];
+const Logo = entry?.[0];
+---
+<span class="csl" style={entry ? `--logo-h: ${entry[1]}px` : undefined}>
+  {Logo
+    ? <><Logo class="csl__svg" aria-hidden="true" focusable="false" /><span class="visually-hidden">{entry![2]}</span></>
+    : <span class="csl__fallback">{brand}</span>}
+</span>
+
+<style>
+  .csl {
+    display: flex;
+    align-items: center;
+    width: 100%;
+    max-width: 186.67px; /* 280 × 2/3 */
+    height: 20px;
+    color: inherit;
+  }
+  .csl__svg {
+    display: block;
+    height: calc(var(--logo-h) * 2 / 3);
+    width: auto;
+    max-width: none;
+    flex-shrink: 0;
+  }
+  .csl__fallback { font: 500 var(--type-h2)/1 var(--font-sans); white-space: nowrap; }
+  @media (min-width: 768px) {
+    .csl { max-width: 280px; height: 30px; }
+    .csl__svg { height: var(--logo-h); }
+  }
+</style>

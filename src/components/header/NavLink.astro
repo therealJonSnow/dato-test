@@ -1,0 +1,33 @@
+---
+/**
+ * Figma: nav-link (2884:11180) — menu link in nav-dropdown and mobile-menu.
+ * Oracle/H2 (the Sizing mode makes it smaller on mobile). Hover = underline, same colour,
+ * instant; keyboard focus shows the same underline.
+ * `all` renders the "→ All …" variant (arrow + permanently underlined label, Figma
+ * link-all-* frames, gap space/3xs).
+ */
+interface Props { href: string; all?: boolean }
+const { href, all = false } = Astro.props;
+---
+<a class:list={['nav-link', 't-h2', all && 'nav-link--all']} href={href}>
+  {all && <span class="nav-link__arrow" aria-hidden="true">→</span>}
+  <span class="nav-link__label"><slot /></span>
+</a>
+
+<style>
+  .nav-link {
+    display: inline-flex;
+    gap: var(--space-3xs);
+    align-items: flex-start;
+    color: var(--text-primary);
+  }
+  .nav-link--all { white-space: nowrap; }
+  .nav-link--all .nav-link__label,
+  .nav-link:hover .nav-link__label,
+  .nav-link:focus-visible .nav-link__label {
+    text-decoration: underline;
+    text-decoration-thickness: from-font;
+    text-underline-position: from-font;
+  }
+  .nav-link:focus-visible { outline: 2px solid var(--border-strong); outline-offset: 2px; }
+</style>

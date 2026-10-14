@@ -1,0 +1,175 @@
+---
+/**
+ * Figma: cms-panel layer of developer-editor-experience-section (3026:11822), e.g. 3026:11397.
+ * Decorative DatoCMS record editor. Every size is in em of the panel font-size, which the parent
+ * mock-up sets per breakpoint × focus (drawn "Content" header = 1em = 7.918px at 1152+ Developer).
+ * Rules from the variants:
+ *  - Developer: header + first four field rows at 70% opacity (the panel is "behind").
+ *  - Editor: everything at 100%.
+ *  - 768+/<768 Editor additionally enlarges the field label/value text (Figma: labels ×1.64,
+ *    values ×1.52) via --cms-lab-z / --cms-val-z set by the parent; label column width does not change.
+ *  - The "Hero Video" thumbnail is a video still → asset placeholder.
+ */
+import HeaderIcon from '../../assets/svg/dev-editor/header-icon.svg';
+import ClientIcon from '../../assets/svg/dev-editor/client-icon.svg';
+import CalendarIcon from '../../assets/svg/dev-editor/calendar-icon.svg';
+
+interface Props {
+  client?: string;
+  date?: string;
+  dateHint?: string;
+  projectName?: string;
+  projectHint?: string;
+  title?: string;
+  richtext?: string;
+}
+const {
+  client = 'Human Interface',
+  date = '09/10/2026',
+  dateHint = 'Used for sorting on the index page',
+  projectName = 'Brand and Website for Human Interface',
+  projectHint = 'Example: "MagicBell website"',
+  title = 'Infrastructure with human skills',
+  richtext = 'ABC Monument Grotesk established a foundation that the rest of the identity could build on — guiding iconography, patterns, and layout with the same sense of structure and clarity.',
+} = Astro.props;
+---
+<div class="cms">
+  <div class="cms__header cms__dim">
+    <HeaderIcon class="cms__header-icon" />
+    <span class="cms__val">Content</span>
+  </div>
+  <div class="cms__fields">
+    <div class="cms__field cms__dim">
+      <div class="cms__row">
+        <span class="cms__label"><span class="cms__lab">Client*</span></span>
+        <span class="cms__value"><ClientIcon class="cms__icon" /><span class="cms__val">{client}</span></span>
+      </div>
+    </div>
+    <div class="cms__field cms__dim">
+      <div class="cms__row">
+        <span class="cms__label"><span class="cms__lab">Date*</span></span>
+        <span class="cms__value"><CalendarIcon class="cms__icon" /><span class="cms__val">{date}</span></span>
+      </div>
+      <div class="cms__row cms__row--hint">
+        <span class="cms__label"></span>
+        <span class="cms__lab cms__hint">{dateHint}</span>
+      </div>
+    </div>
+    <div class="cms__field cms__dim">
+      <div class="cms__row">
+        <span class="cms__label"><span class="cms__lab">Project name*</span></span>
+        <span class="cms__value"><span class="cms__val">{projectName}</span></span>
+      </div>
+      <div class="cms__row cms__row--hint">
+        <span class="cms__label"></span>
+        <span class="cms__lab cms__hint">{projectHint}</span>
+      </div>
+    </div>
+    <div class="cms__field cms__field--active cms__dim">
+      <div class="cms__row">
+        <span class="cms__label"><span class="cms__lab">Title*</span></span>
+        <span class="cms__value"><span class="cms__cursor"></span><span class="cms__val">{title}</span></span>
+      </div>
+    </div>
+    <div class="cms__field">
+      <div class="cms__row cms__row--top">
+        <span class="cms__label"><span class="cms__lab cms__lab--strong">Hero Video*</span></span>
+        <span class="cms__thumb">
+          <span class="cms__thumb-ph asset-placeholder">VIDEO: hero thumbnail</span>
+        </span>
+      </div>
+    </div>
+    <div class="cms__field cms__field--rich">
+      <span class="cms__lab cms__small">Content</span>
+      <div class="cms__rich">
+        <span class="cms__small cms__toolbar">Richtext</span>
+        <div class="cms__row cms__row--top">
+          <span class="cms__label"><span class="cms__small">Text*</span></span>
+          <p class="cms__rich-text">{richtext}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .cms {
+    --cms-fg: var(--color-yellow-50);
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-brown-800);
+    border: 0.1em solid var(--color-purple-deep-500);
+    border-radius: 0.885em;
+    color: var(--cms-fg);
+    font-family: var(--font-sans);
+    line-height: 1;
+    letter-spacing: -0.02em;
+  }
+  .cms__dim { transition: opacity var(--de-dur, 300ms) var(--de-ease, ease-out); }
+  :global([data-focus='developer']) .cms__dim { opacity: 0.7; }
+
+  .cms__header { display: flex; align-items: center; gap: 0.375em; padding: 1em; }
+  .cms__header-icon { width: 0.4617em; height: 0.3078em; }
+  .cms__fields { display: flex; flex-direction: column; border-top: 0.0625em solid var(--color-purple-deep-500); }
+
+  .cms__field {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5em;
+    padding: 1em;
+  }
+  /* tiny corner ticks (divider-top / divider-bottom) */
+  .cms__field::before,
+  .cms__field::after {
+    content: '';
+    position: absolute;
+    top: 0.384em;
+    width: 0.75em;
+    border-top: 0.0625em solid color-mix(in srgb, var(--color-yellow-50) 20%, transparent);
+  }
+  .cms__field::before { left: 0.078em; }
+  .cms__field::after { right: -0.086em; }
+  .cms__field--active { background: var(--color-purple-deep-500); }
+
+  .cms__row { display: flex; align-items: flex-end; gap: 0.375em; }
+  .cms__row--top { align-items: flex-start; }
+  .cms__label { flex: 0 0 10em; }
+  .cms__lab {
+    font-weight: 400;
+    font-size: calc(0.8125em * var(--cms-lab-z, 1));
+    opacity: 0.5;
+    transition: font-size var(--de-dur, 300ms) var(--de-ease, ease-out);
+  }
+  .cms__lab--strong { opacity: 0.7; }
+  .cms__hint { line-height: 1.2; white-space: nowrap; }
+  .cms__value { display: inline-flex; align-items: center; gap: 0.375em; white-space: nowrap; }
+  .cms__val {
+    font-weight: 500;
+    font-size: calc(1em * var(--cms-val-z, 1));
+    white-space: nowrap;
+    transition: font-size var(--de-dur, 300ms) var(--de-ease, ease-out);
+  }
+  .cms__icon { width: 0.875em; height: auto; }
+  .cms__cursor { align-self: stretch; width: 0.0625em; margin-right: 0.0625em; background: var(--cms-fg); }
+
+  .cms__thumb {
+    position: relative;
+    display: block;
+    width: 31.624em;
+    height: 14.624em;
+    border-radius: 0.6em;
+    overflow: hidden;
+    background: var(--color-orange-deep-800);
+  }
+  .cms__thumb-ph { position: absolute; inset: 0; opacity: 0.7; font-size: max(0.8125em, 6px); border-radius: inherit; }
+
+  .cms__field--rich { padding: 1.384em 1em 1em 1.077em; gap: 1.8em; }
+  .cms__small { font-size: 0.8125em; font-weight: 400; opacity: 0.5; }
+  .cms__rich { display: flex; flex-direction: column; gap: 0.5em; padding-left: 0.4em; }
+  .cms__toolbar { font-weight: 500; }
+  .cms__rich-text { width: 31.25em; font-weight: 500; line-height: 1.3; }
+</style>

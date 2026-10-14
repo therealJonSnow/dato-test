@@ -1,0 +1,268 @@
+---
+/**
+ * Figma: header (breakpoint proposal) — component set 3026:66652, Theme=Orange.
+ * Instances: 1320 3029:66057 · 768 3030:20059 · 393 3030:21233 · 1152 3030:18865 · 1920 3030:17665
+ *
+ * Rules implemented (from the component description):
+ * - NOT sticky: scrolls away with the page. Height 82, side padding section/padding-x,
+ *   header-inner max 1160 centred; nav links absolutely centred.
+ * - ≥1320: logo, nav links, search, Login, Get Started.
+ *   1152–1319: same without Login.
+ *   768–1151: nav hidden; search, Login, Get Started, three-dots menu icon.
+ *   <768: logo, Get Started, three-dots icon (search + Login hidden).
+ * - Desktop (≥1152): hovering a nav item with a chevron opens its nav-dropdown under the
+ *   header; click also opens it (touch laptops / keyboard). Moving to another item switches
+ *   the panel; hovering Philosophy or Pricing, leaving the header+panel area, clicking outside
+ *   or Esc closes it. Overlay — header stays 82px, page does not move. Instant, no animation.
+ *   The nav item has no active style.
+ * - Mobile (<1152): the three-dots icon toggles the full-width mobile-menu under the header;
+ *   the page behind does not scroll while it is open (scroll lock on <html>). Tap again to
+ *   close; Esc also closes. Crossing to ≥1152 closes it.
+ * - Get Started = button deep-on-white / secondary (soft) from the Button component.
+ */
+import DatoLogo from '../ui/DatoLogo.astro';
+import Button from '../ui/Button.astro';
+import NavDropdown from '../header/NavDropdown.astro';
+import MobileMenu from '../header/MobileMenu.astro';
+import { navItems, type NavItem } from '../header/nav-data';
+
+interface Props {
+  items?: NavItem[];
+  homeHref?: string;
+  searchHref?: string;
+  login?: { label: string; href: string };
+  cta?: { label: string; href: string };
+  theme?: 'default' | 'orange' | 'green' | 'purple' | 'blue' | 'pink';
+}
+const {
+  items = navItems,
+  homeHref = '/',
+  searchHref = '#search',
+  login = { label: 'Login', href: '#' },
+  cta = { label: 'Get Started', href: '#' },
+  theme = 'orange',
+} = Astro.props;
+---
+<header class="site-header" data-theme={theme} data-site-header>
+  <div class="site-header__inner">
+    <a class="site-header__logo" href={homeHref} aria-label="DatoCMS home">
+      <DatoLogo version="long" width={139.25} label="" />
+    </a>
+
+    <nav class="site-header__nav" aria-label="Main">
+      <ul class="site-header__nav-list">
+        {items.map((item) => (
+          <li>
+            {item.columns ? (
+              <button
+                type="button"
+                class="site-header__nav-item t-subtitle"
+                aria-expanded="false"
+                aria-controls={`nav-panel-${item.id}`}
+                data-nav-trigger
+              >
+                {item.label}
+                <svg class="site-header__chevron" width="6" height="4" viewBox="0 0 6 4" fill="none" aria-hidden="true" focusable="false">
+                  <path d="M0.49353 0.5625L3.00248 2.75516L5.51144 0.5625" stroke="currentColor" stroke-width="1.5" />
+                </svg>
+              </button>
+            ) : (
+              <a class="site-header__nav-item t-subtitle" href={item.href} data-nav-plain>{item.label}</a>
+            )}
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="site-header__actions">
+      <a class="site-header__search" href={searchHref} aria-label="Search">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" focusable="false">
+          <path d="M13.1897 6.59484C13.1897 2.95943 10.2302 0 6.59484 0C2.95943 0 0 2.95943 0 6.59484C0 10.2302 2.95943 13.1897 6.59484 13.1897C8.1199 13.1897 9.51306 12.6703 10.6342 11.7965L14.8384 16.0007L16.0007 14.8384L11.7965 10.6342C12.6963 9.47965 13.1864 8.05859 13.1897 6.59484ZM1.64871 6.59484C1.64871 3.86623 3.86623 1.64871 6.59484 1.64871C9.32346 1.64871 11.541 3.86623 11.541 6.59484C11.541 9.32346 9.32346 11.541 6.59484 11.541C3.86623 11.541 1.64871 9.32346 1.64871 6.59484Z" fill="currentColor" />
+        </svg>
+      </a>
+      <a class="site-header__login t-subtitle" href={login.href}>{login.label}</a>
+      <Button href={cta.href} appearance="deep-on-white" variant="secondary">{cta.label}</Button>
+      <button
+        type="button"
+        class="site-header__menu-btn"
+        aria-expanded="false"
+        aria-controls="mobile-menu"
+        aria-label="Open menu"
+        data-menu-toggle
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true" focusable="false">
+          <circle cx="8" cy="3" r="1.5" fill="currentColor" />
+          <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+          <circle cx="8" cy="13" r="1.5" fill="currentColor" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  {items.filter((i) => i.columns).map((item) => (
+    <NavDropdown id={`nav-panel-${item.id}`} label={item.label} columns={item.columns!} />
+  ))}
+  <MobileMenu id="mobile-menu" items={items} />
+</header>
+
+<style>
+  .site-header {
+    position: relative; /* not sticky — scrolls away with the page */
+    z-index: 40;
+    display: flex;
+    justify-content: center;
+    height: 82px;
+    padding-inline: var(--section-padding-x);
+    background: var(--surface-default);
+    color: var(--text-primary);
+  }
+  .site-header__inner {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex: 1 1 0;
+    max-width: 1160px;
+    height: 100%;
+  }
+  .site-header__logo { display: block; color: var(--text-primary); }
+  .site-header__logo:focus-visible,
+  .site-header__nav-item:focus-visible,
+  .site-header__search:focus-visible,
+  .site-header__login:focus-visible,
+  .site-header__menu-btn:focus-visible { outline: 2px solid var(--border-strong); outline-offset: 2px; }
+
+  /* Nav links: absolutely centred, ≥1152 only */
+  .site-header__nav {
+    display: none;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+  }
+  .site-header__nav-list > li { display: flex; }
+  .site-header__nav-list { display: flex; align-items: center; gap: var(--space-sm); }
+  .site-header__nav-item {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    white-space: nowrap;
+    color: var(--text-primary);
+  }
+  .site-header__chevron { color: var(--text-muted); flex-shrink: 0; }
+
+  .site-header__actions { display: flex; align-items: center; justify-content: flex-end; gap: var(--space-sm); }
+  .site-header__search { display: none; color: var(--text-primary); }
+  .site-header__login { display: none; white-space: nowrap; }
+  .site-header__menu-btn {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    margin: -8px;
+    color: var(--text-primary);
+  }
+
+  @media (min-width: 768px) {
+    .site-header__search { display: block; }
+    .site-header__login { display: block; }
+  }
+  @media (min-width: 1152px) {
+    .site-header__nav { display: block; }
+    .site-header__login { display: none; }
+    .site-header__menu-btn { display: none; }
+    .site-header :global([data-mobile-menu]) { display: none; }
+  }
+  @media (min-width: 1320px) {
+    .site-header__login { display: block; }
+  }
+  @media (max-width: 1151.98px) {
+    .site-header :global([data-nav-panel]) { display: none; }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-site-header]');
+  if (header) {
+    const triggers = [...header.querySelectorAll<HTMLButtonElement>('[data-nav-trigger]')];
+    const panelOf = (t: HTMLButtonElement) => document.getElementById(t.getAttribute('aria-controls')!);
+    let current: HTMLButtonElement | null = null;
+    let hoverOpened: HTMLButtonElement | null = null;
+    let lastPointer = '';
+
+    /* ---------- Desktop dropdowns (instant, no animation) ---------- */
+    const closeDropdown = () => {
+      if (!current) return;
+      current.setAttribute('aria-expanded', 'false');
+      const p = panelOf(current);
+      if (p) p.hidden = true;
+      current = null;
+    };
+    const openDropdown = (t: HTMLButtonElement) => {
+      if (current === t) return;
+      closeDropdown();
+      t.setAttribute('aria-expanded', 'true');
+      const p = panelOf(t);
+      if (p) p.hidden = false;
+      current = t;
+    };
+
+    triggers.forEach((t) => {
+      t.addEventListener('pointerenter', (e) => {
+        if (e.pointerType !== 'mouse') return;
+        if (current !== t) hoverOpened = t;
+        openDropdown(t);
+      });
+      t.addEventListener('pointerdown', (e) => { lastPointer = e.pointerType; });
+      t.addEventListener('click', () => {
+        // A mouse click right after hover-opening keeps the panel open; otherwise toggle.
+        if (lastPointer === 'mouse' && hoverOpened === t && current === t) { hoverOpened = null; return; }
+        hoverOpened = null;
+        if (current === t) closeDropdown(); else openDropdown(t);
+        lastPointer = '';
+      });
+    });
+    header.querySelectorAll('[data-nav-plain]').forEach((a) =>
+      a.addEventListener('pointerenter', (e) => { if ((e as PointerEvent).pointerType === 'mouse') closeDropdown(); }),
+    );
+    // Leaving the header + panel area closes the panel (panels are children of <header>).
+    header.addEventListener('pointerleave', (e) => { if (e.pointerType === 'mouse') closeDropdown(); });
+
+    /* ---------- Mobile menu (<1152) ---------- */
+    const menuBtn = header.querySelector<HTMLButtonElement>('[data-menu-toggle]');
+    const menu = header.querySelector<HTMLElement>('[data-mobile-menu]');
+    const setMenu = (open: boolean) => {
+      if (!menuBtn || !menu) return;
+      menuBtn.setAttribute('aria-expanded', String(open));
+      menuBtn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      menu.hidden = !open;
+      if (open) {
+        const bottom = header.getBoundingClientRect().bottom;
+        menu.style.setProperty('--mobile-menu-max-h', `${Math.max(0, window.innerHeight - bottom)}px`);
+      } else {
+        menu.dispatchEvent(new CustomEvent('mobile-menu:reset'));
+      }
+      // Page behind does not scroll while the menu is open.
+      document.documentElement.style.overflow = open ? 'hidden' : '';
+    };
+    const menuOpen = () => menuBtn?.getAttribute('aria-expanded') === 'true';
+    menuBtn?.addEventListener('click', () => setMenu(!menuOpen()));
+    matchMedia('(min-width: 1152px)').addEventListener('change', (e) => {
+      if (e.matches) setMenu(false); else closeDropdown();
+    });
+
+    /* ---------- Shared: Esc, click outside, focus leaving ---------- */
+    document.addEventListener('keydown', (e) => {
+      if (e.key !== 'Escape') return;
+      if (current) { const t = current; closeDropdown(); t.focus(); }
+      if (menuOpen()) { setMenu(false); menuBtn?.focus(); }
+    });
+    document.addEventListener('pointerdown', (e) => {
+      if (!header.contains(e.target as Node)) closeDropdown();
+    });
+    header.addEventListener('focusout', (e) => {
+      const next = e.relatedTarget as Node | null;
+      if (next && !header.contains(next)) closeDropdown();
+    });
+  }
+</script>

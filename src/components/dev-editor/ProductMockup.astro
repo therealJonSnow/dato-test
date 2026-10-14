@@ -1,0 +1,134 @@
+---
+/**
+ * Figma: "illustration" of developer-editor-experience-section (3026:11822) — e.g. 3026:11388.
+ * Decorative product mock-up: code-editor, website-preview (+ website-preview-navbar), cms-panel.
+ * aria-hidden layers; one accessible label on the wrapper (role="img").
+ *
+ * Scaling: .mock is an inline-size container. 1 drawn px = --u = 100cqi / drawn width, so the
+ * mock-up keeps its drawn proportions at any width:
+ *   1152+  landscape, drawn 1015.03 × 420 (max 1015px wide, as in the 1152/1320/1920 frames)
+ *   <1152  portrait,  drawn 648 × 974.7 (768 frame; the 393 frame is the same drawing at 333 wide)
+ * Geometry per breakpoint × Focus is copied from the two Focus variants of each breakpoint;
+ * the section sets data-focus="developer|editor" and the layers transition left/top/size and
+ * font-size together (300ms ease-out; instant with prefers-reduced-motion).
+ */
+import CodeEditor from './CodeEditor.astro';
+import WebsitePreview from './WebsitePreview.astro';
+import CmsPanel from './CmsPanel.astro';
+
+interface Props {
+  label?: string;
+  url?: string;
+  videoSrc?: string;
+  videoPoster?: string;
+}
+const {
+  label = 'Product mock-up: a GraphQL query in a code editor, the website it renders, and the same content in the DatoCMS editor',
+  url = 'overnice.com',
+  videoSrc,
+  videoPoster,
+} = Astro.props;
+---
+<div class="mock" role="img" aria-label={label}>
+  <div class="mock__stage" aria-hidden="true">
+    <div class="mock__layer mock__wp"><WebsitePreview videoSrc={videoSrc} videoPoster={videoPoster} /></div>
+    <div class="mock__layer mock__cms"><CmsPanel /></div>
+    <div class="mock__layer mock__nav">
+      <div class="nav">
+        <span class="nav__dots"><i></i><i></i><i></i></span>
+        <span class="nav__url">{url}</span>
+        <span class="nav__dots"><i></i><i></i><i></i><i></i></span>
+      </div>
+    </div>
+    <div class="mock__layer mock__ce"><CodeEditor /></div>
+  </div>
+</div>
+
+<style>
+  .mock {
+    /* portrait drawing (<1152) */
+    --W: 648;
+    --H: 974.7;
+    width: 100%;
+    max-width: 648px;
+    margin-inline: auto;
+    container-type: inline-size;
+  }
+  .mock__stage {
+    position: relative;
+    width: 100%;
+    aspect-ratio: var(--W) / var(--H);
+    /* website-preview / navbar (same in both Focus states) */
+    --wp-x: 36.71; --wp-y: 143.18; --wp-w: 578.25; --wp-h: 692.06;
+    --nav-x: 18.66; --nav-y: 129.14; --nav-w: 637.06; --nav-h: 23.83;
+    /* Developer focus (default) */
+    --ce-x: 0; --ce-y: 0; --ce-w: 449.75; --ce-h: 357.96; --ce-fs: 15.895;
+    --cms-x: 258.81; --cms-y: 668.65; --cms-w: 389.19; --cms-h: 306.05; --cms-fs: 8.847;
+    --cms-lab-z: 1; --cms-val-z: 1;
+  }
+  /* Editor focus, portrait (768+ and <768) */
+  :global([data-focus='editor']) .mock__stage {
+    --ce-w: 389.19; --ce-h: 309.76; --ce-fs: 13.755;
+    --cms-x: 153.08; --cms-y: 585.5; --cms-w: 494.92; --cms-h: 389.19; --cms-fs: 11.25;
+    --cms-lab-z: 1.639; --cms-val-z: 1.519;
+  }
+
+  @media (min-width: 1152px) {
+    .mock { --W: 1015.03; --H: 420; max-width: 1015.03px; }
+    .mock__stage {
+      --wp-x: 182.49; --wp-y: 55.86; --wp-w: 623.08; --wp-h: 341.88;
+      --nav-x: 182.01; --nav-y: 31.77; --nav-w: 624.04; --nav-h: 24.11;
+      --ce-x: 0; --ce-y: 0; --ce-w: 344.76; --ce-h: 274.4; --ce-fs: 12.185;
+      --cms-x: 666.42; --cms-y: 146.09; --cms-w: 348.32; --cms-h: 273.91; --cms-fs: 7.918;
+    }
+    :global([data-focus='editor']) .mock__stage {
+      --ce-w: 299.84; --ce-h: 246.4; --ce-fs: 10.597;
+      --cms-x: 592.89; --cms-y: 88.49; --cms-w: 421.57; --cms-h: 331.51; --cms-fs: 9.583;
+      --cms-lab-z: 1; --cms-val-z: 1;
+    }
+  }
+
+  .mock__layer {
+    --u: calc(100cqi / var(--W));
+    position: absolute;
+    transition-property: left, top, width, height, font-size;
+    transition-duration: var(--de-dur, 300ms);
+    transition-timing-function: var(--de-ease, ease-out);
+  }
+  .mock__wp {
+    left: calc(var(--wp-x) * var(--u)); top: calc(var(--wp-y) * var(--u));
+    width: calc(var(--wp-w) * var(--u)); height: calc(var(--wp-h) * var(--u));
+    font-size: var(--u);
+  }
+  .mock__nav {
+    left: calc(var(--nav-x) * var(--u)); top: calc(var(--nav-y) * var(--u));
+    width: calc(var(--nav-w) * var(--u)); height: calc(var(--nav-h) * var(--u));
+    font-size: var(--u);
+  }
+  .mock__ce {
+    left: calc(var(--ce-x) * var(--u)); top: calc(var(--ce-y) * var(--u));
+    width: calc(var(--ce-w) * var(--u)); height: calc(var(--ce-h) * var(--u));
+    font-size: calc(var(--ce-fs) * var(--u));
+  }
+  .mock__cms {
+    left: calc(var(--cms-x) * var(--u)); top: calc(var(--cms-y) * var(--u));
+    width: calc(var(--cms-w) * var(--u)); height: calc(var(--cms-h) * var(--u));
+    font-size: calc(var(--cms-fs) * var(--u));
+  }
+
+  /* website-preview-navbar: the exported browser-chrome bitmap is replaced by a drawn bar */
+  .nav {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-inline: 32em 10em;
+    background: var(--color-brown-800);
+    border-radius: 0 11.574em 0 0;
+    color: var(--color-yellow-50);
+  }
+  .nav__url { font: 500 6.5em/1 var(--font-sans); opacity: 0.6; }
+  .nav__dots { display: flex; gap: 4em; }
+  .nav__dots i { width: 5em; height: 5em; border-radius: 50%; border: 0.8em solid currentColor; opacity: 0.5; }
+</style>

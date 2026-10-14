@@ -1,0 +1,124 @@
+---
+/**
+ * Figma: footer-animation-section (proposal) — 3020:67323, Theme=Purple
+ * Instances: 1320 3029:66070 · 768 3030:20072 · 393 3030:21246
+ * - No breakpoints: full-width video at a fixed 494px height, Footer-cta band below.
+ * - Video: looping waving hand, blend Screen over Purple Light/400 (= surface/accent in the
+ *   Purple theme). Plays muted + looping ONLY while the section is in view; with
+ *   prefers-reduced-motion it shows its first frame and never plays.
+ * - The MP4 can't be exported from Figma: pass `videoSrc` (or drop the file in and set it).
+ *   Without it the <video> stays empty and a placeholder label is shown. The source is
+ *   attached lazily (data-src) shortly before the section scrolls into view.
+ * - footer-cta-band: surface/inverse full width; Footer-cta content capped at 1320.
+ */
+import FooterCta from '../footer/FooterCta.astro';
+
+interface Props {
+  videoSrc?: string;
+  poster?: string;
+  ctaText?: string;
+  ctaHref?: string;
+  theme?: 'default' | 'orange' | 'green' | 'purple' | 'blue' | 'pink';
+}
+const {
+  videoSrc,
+  poster,
+  ctaText = 'Questions? Ask away [••]',
+  ctaHref = '#contact',
+  theme = 'purple',
+} = Astro.props;
+---
+<section class="footer-anim" data-theme={theme} aria-label="Contact">
+  <div class="footer-anim__media" data-footer-video-wrap>
+    <video
+      class="footer-anim__video"
+      data-footer-video
+      data-src={videoSrc}
+      poster={poster}
+      muted
+      loop
+      playsinline
+      preload="none"
+      aria-hidden="true"
+      tabindex="-1"
+    ></video>
+    {!videoSrc && (
+      <div class="footer-anim__placeholder" role="img" aria-label="Waving hand animation">
+        VIDEO: waving hand loop (full width × 494, blend Screen) — MP4 from designer
+      </div>
+    )}
+  </div>
+  <div class="footer-anim__band">
+    <FooterCta text={ctaText} href={ctaHref} />
+  </div>
+</section>
+
+<style>
+  .footer-anim { display: flex; flex-direction: column; }
+  .footer-anim__media {
+    position: relative;
+    height: 494px;
+    background: var(--surface-accent);
+    overflow: hidden;
+  }
+  .footer-anim__video {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    object-fit: cover;
+    mix-blend-mode: screen;
+  }
+  .footer-anim__placeholder {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    padding: var(--space-md);
+    color: var(--text-primary);
+    font: 500 12px/1.2 var(--font-mono);
+    text-align: center;
+  }
+  .footer-anim__band {
+    display: flex;
+    justify-content: center;
+    background: var(--surface-inverse);
+    overflow: clip;
+  }
+</style>
+
+<script>
+  import { onVisibility, prefersReducedMotion } from '../../scripts/typewriter';
+
+  document.querySelectorAll<HTMLVideoElement>('[data-footer-video]').forEach((video) => {
+    const wrap = video.closest<HTMLElement>('[data-footer-video-wrap]') ?? video;
+    const src = video.dataset.src;
+    let loaded = false;
+    const load = () => {
+      if (loaded || !src) return;
+      loaded = true;
+      video.src = src;
+      video.preload = 'auto';
+      video.load();
+    };
+
+    // Attach the source a little before the section reaches the viewport.
+    const pre = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { load(); pre.disconnect(); }
+    }, { rootMargin: '400px 0px' });
+    pre.observe(wrap);
+
+    let inView = false;
+    const sync = () => {
+      if (!src) return;
+      if (prefersReducedMotion()) {
+        // Reduced motion: first frame only.
+        video.pause();
+        if (video.readyState > 0) video.currentTime = 0;
+        return;
+      }
+      if (inView) { load(); video.play().catch(() => {}); } else video.pause();
+    };
+    onVisibility(wrap, () => { inView = true; sync(); }, () => { inView = false; sync(); });
+    matchMedia('(prefers-reduced-motion: reduce)').addEventListener('change', sync);
+  });
+</script>

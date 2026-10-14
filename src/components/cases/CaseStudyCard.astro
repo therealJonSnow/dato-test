@@ -1,0 +1,56 @@
+---
+/**
+ * Figma: Case-study-card (proposal) (3014:13589) — State=Default|Hover, Breakpoint=768+|<768.
+ *
+ * - Side padding = section/padding-x at every width (so it follows the Sizing mode).
+ * - ≥768 (roomy): padding-block space/2xl (60), gap space/lg (30), logo box 30 tall up to 280 wide,
+ *   text Oracle/Body in text/muted, max 280 wide.
+ * - <768 (compact): padding-block space/xl (40), gap space/md (20), logo box 20 tall (logo at 2/3),
+ *   text Oracle/Subtitle Medium in text/muted.
+ * - HOVER (instant, no transition): background surface/inverse, logo → text/on-inverse,
+ *   text → text/on-inverse-muted. Only ≥768 and only on hover-capable pointers (no hover on touch).
+ * - The whole card is the link when `href` is given; the brand name is its accessible name prefix.
+ */
+import CaseStudyLogo, { type Brand } from './CaseStudyLogo.astro';
+
+interface Props {
+  brand: Brand;
+  text: string;
+  href?: string;
+}
+const { brand, text, href } = Astro.props;
+const Tag = href ? 'a' : 'article';
+---
+<Tag class="csc" href={href}>
+  <CaseStudyLogo brand={brand} />
+  <p class="csc__text">{text}</p>
+</Tag>
+
+<style>
+  .csc {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-md);
+    padding: var(--space-xl) var(--section-padding-x);
+    background: var(--surface-default);
+    color: var(--text-primary);
+    overflow: clip;
+    height: 100%;
+  }
+  .csc__text {
+    max-width: 280px;
+    color: var(--text-muted);
+    font: 500 var(--type-subtitle)/1 var(--font-sans);
+    letter-spacing: -0.01em;
+  }
+  @media (min-width: 768px) {
+    .csc { gap: var(--space-lg); padding-block: var(--space-2xl); }
+    .csc__text { font: 400 var(--type-body)/1.3 var(--font-sans); letter-spacing: -0.01em; }
+  }
+  @media (min-width: 768px) and (hover: hover) {
+    a.csc:hover { background: var(--surface-inverse); color: var(--text-on-inverse); }
+    a.csc:hover .csc__text { color: var(--text-on-inverse-muted); }
+  }
+  .csc:focus-visible { outline: 2px solid var(--border-strong); outline-offset: -2px; }
+</style>

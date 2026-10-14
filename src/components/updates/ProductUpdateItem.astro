@@ -1,0 +1,122 @@
+---
+/**
+ * Figma: product-update-item (421:17652) — variants State=Default|Hover × Size=1320|768|393.
+ * Rows of the product-updates section. Size is NOT a prop: it follows the viewport.
+ *
+ * - <768 (Size=393): stacked, date + headline in Oracle/H1, tags right-aligned below,
+ *   smaller tags (12px padding all round, Subtitle 14px) and a 38px userpic.
+ * - 768–1151 (Size=768): stacked, Oracle/H1, tags 12/16 padding, 40px userpic.
+ * - ≥1152 (Size=1320): one row — date + headline (Oracle/H2) left, tags + userpic right.
+ * - Date line is the same colour at 70% opacity.
+ * - HOVER (State=Hover, Figma: instant CHANGE_TO, no transition): full-bleed accent band
+ *   (surface/accent) behind the row, text → text/primary, tag borders → border/default.
+ *   Only from 1152px up AND only on hover-capable pointers — touch shows Default only.
+ * - The full-bleed band escapes the 1160 column; the section clips it (overflow-x: clip).
+ * - Renders an <a> when `href` is given (the whole row is the link), otherwise an <article>.
+ */
+interface Props {
+  date: string;
+  /** Optional machine-readable date for <time datetime> */
+  datetime?: string;
+  title: string;
+  tags: string[];
+  /** Author name — used as alt text for the userpic */
+  author?: string;
+  /** Userpic URL; when missing a placeholder is shown (raster asset not exportable) */
+  userpic?: string;
+  href?: string;
+}
+const { date, datetime, title, tags, author = 'Author', userpic, href } = Astro.props;
+const Tag = href ? 'a' : 'article';
+---
+<Tag class="pui" href={href}>
+  <span class="pui__text">
+    <time class="pui__date" datetime={datetime}>{date}</time>
+    <span class="pui__title">{title}</span>
+  </span>
+  <span class="pui__meta">
+    {tags.map((t) => <span class="pui__tag">{t}</span>)}
+    {userpic
+      ? <img class="pui__userpic" src={userpic} alt={author} width="40" height="40" loading="lazy" />
+      : <span class="pui__userpic asset-placeholder" role="img" aria-label={`IMAGE: userpic of ${author} (40×40)`}></span>}
+  </span>
+</Tag>
+
+<style>
+  .pui {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-lg);
+    padding-block: var(--space-lg);
+    color: var(--text-on-inverse);
+  }
+  /* Full-bleed hover band (Figma bg-hover is wider than the frame and 3px taller, covering the dividers) */
+  .pui::before {
+    content: '';
+    position: absolute;
+    inset: -1px -100vw;
+    background: var(--surface-accent);
+    opacity: 0;
+    z-index: 0;
+    pointer-events: none;
+  }
+  .pui__text, .pui__meta { position: relative; z-index: 1; }
+
+  .pui__text {
+    display: flex;
+    flex-direction: column;
+    align-self: stretch;
+    font: 500 var(--type-h1)/1 var(--font-sans);
+    letter-spacing: -0.04em;
+  }
+  .pui__date { opacity: 0.7; }
+
+  .pui__meta { display: flex; align-items: center; gap: var(--space-3xs); flex-shrink: 0; }
+  .pui__tag {
+    padding: var(--space-xs);
+    border: 1px solid var(--border-on-inverse);
+    border-radius: var(--radius-full);
+    font: 500 var(--type-subtitle)/1 var(--font-sans);
+    letter-spacing: -0.01em;
+    white-space: nowrap;
+  }
+  .pui__userpic {
+    display: block;
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    border-radius: 50%;
+    object-fit: cover;
+    mix-blend-mode: luminosity;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 768px) {
+    .pui__tag { padding: var(--space-xs) var(--space-sm); }
+    .pui__userpic { width: 40px; height: 40px; }
+  }
+
+  @media (min-width: 1152px) {
+    .pui {
+      flex-direction: row;
+      align-items: center;
+      gap: var(--space-2xs);
+    }
+    .pui__text {
+      flex: 1 1 0;
+      min-width: 0;
+      font: 500 var(--type-h2)/1.1 var(--font-sans);
+      letter-spacing: -0.02em;
+    }
+  }
+
+  /* Hover = instant, desktop (≥1152) + hover-capable pointers only */
+  @media (min-width: 1152px) and (hover: hover) {
+    a.pui:hover::before { opacity: 1; }
+    a.pui:hover { color: var(--text-primary); }
+    a.pui:hover .pui__tag { border-color: var(--border-default); }
+  }
+  .pui:focus-visible { outline: 2px solid var(--border-on-inverse-strong); outline-offset: 4px; }
+</style>

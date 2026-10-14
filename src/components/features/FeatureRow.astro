@@ -1,0 +1,73 @@
+---
+/**
+ * Figma: feature-row (proposal) — component set 3011:65510 (Content=1–5 × State=Active|Inactive)
+ *
+ * Rules implemented
+ * - One FeatureRow with title, description and an active flag (Content=1–5 is content, not a variant).
+ * - Active shows the arrow and the description; Inactive shows the title only.
+ * - Title = Oracle/H1 in text/on-inverse, description = Oracle/Body in text/on-inverse-muted,
+ *   10px (space-2xs) between title-row and description, 10px between title and arrow.
+ * - Semantics: <h3> wrapping a <button aria-expanded> that controls the description
+ *   (disclosure). FeaturesMultiSection's script toggles `.is-active`, aria-expanded and `hidden`.
+ * - Colour changes crossfade 300ms ease-in-out (off for prefers-reduced-motion).
+ */
+interface Props {
+  id: string;
+  index: number;
+  title: string;
+  description: string;
+  active?: boolean;
+}
+const { id, index, title, description, active = false } = Astro.props;
+const descId = `${id}-desc`;
+---
+<li class:list={['feature-row', { 'is-active': active }]} data-index={index}>
+  <h3 class="feature-row__heading">
+    <button
+      type="button"
+      class="feature-row__trigger t-h1"
+      aria-expanded={active ? 'true' : 'false'}
+      aria-controls={descId}
+    >
+      <span class="feature-row__title">{title}</span>
+      <span class="feature-row__arrow" aria-hidden="true">→</span>
+    </button>
+  </h3>
+  <p class="feature-row__desc t-body" id={descId} hidden={!active}>{description}</p>
+</li>
+
+<style>
+  .feature-row {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+    padding-bottom: var(--space-md);
+    border-bottom: 1px solid var(--text-on-inverse-muted);
+    transition: border-color 300ms ease-in-out;
+  }
+  .feature-row__heading { font: inherit; }
+  .feature-row__trigger {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    text-align: left;
+    color: var(--text-on-inverse);
+    transition: color 300ms ease-in-out;
+    border-radius: var(--radius-md);
+  }
+  .feature-row__trigger:focus-visible {
+    outline: 2px solid var(--text-on-inverse);
+    outline-offset: 4px;
+  }
+  .feature-row__arrow { display: none; }
+  .feature-row.is-active .feature-row__arrow { display: inline; }
+  .feature-row__desc {
+    color: var(--text-on-inverse-muted);
+    transition: color 300ms ease-in-out;
+  }
+  .feature-row__desc[hidden] { display: none; }
+
+  @media (prefers-reduced-motion: reduce) {
+    .feature-row, .feature-row__trigger, .feature-row__desc { transition: none; }
+  }
+</style>
