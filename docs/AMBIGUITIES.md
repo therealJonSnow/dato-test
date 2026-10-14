@@ -78,7 +78,21 @@ These raw values were mapped to theme tokens in code so they re-theme.
     - Rule: each Theme mode = one Deep family + one Light family. Default = Brown Deep + Yellow Light; Orange = Orange Deep + Orange Light; Green, Purple, Blue and Pink follow the same pattern.
     - The prefix describes the hue honestly, so the Default pair has two different prefixes. Purple Deep (#1d2229) is also really a near-black, but was left as-is.
     - Figma variable collections can't hold a description, so this rule lives here.
-- [ ] **Component-specific variables in the global Sizing collection:** the `test/headless-*` set.
+- [x] **Component-specific variables in the global Sizing collection:** the `test/headless-*` set (17 variables).
+  - **Moved:** the six that matter are now in a new **Component sizing** collection (modes 1920/1320/1152/768/393, mirrored onto the 496 frames on the Responsive page that set a Sizing mode): `headless/display-size`, `symbol-size`, `lockup-gap`, `list-gap`, `list-offset`, `visual-height`. Each description says it is a **Figma preview aid only, not for code**, and gives the code rule (7.3cqi / 9.9cqi + ratios).
+  - **Removed:** the other 11.
+    - pad-left/right/top/bottom and symbol-lift → 0.
+    - symbol-height → the D is square and uses symbol-size.
+    - Label booleans → new **Full label / Short label** properties on the lockup, set by the section's Breakpoint variants.
+    - Headline/paragraph width → fixed max widths: 361/345 on 768+, 319/281 on <768.
+    - section-pad-bottom → `section/padding-y`.
+  - **Checked frame by frame after the change:**
+    - 1320–2560: +1px x / +4px y, section +6px.
+    - 1152: D −8px, now exactly centred; section +6px.
+    - 768: D −7px, now centred; section +9px; the paragraph wraps wider (310 → 345).
+    - 393: lockup +25px, the D is now centred.
+    - The old pad/lift values were pushing the D off-centre, against the component's own "the D is always centred" rule.
+  - The TEST/headless-cms-lockup and TEST/headless-cms-section descriptions were rewritten to match.
 - [ ] **Text style descriptions don't match use:** Display is "for heroes", but the hero uses H1. product-update-item and the headless headline switch between H1 and H2 at a breakpoint without saying so.
 
 ### 5. Motion specs that don't quite close *(on hold)*
@@ -102,6 +116,7 @@ These raw values were mapped to theme tokens in code so they re-theme.
 - None open. Note for next time: "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, so an agent can't edit text in this file. Upload the font as a team font to allow it.
 
 ### Code follow-ups (when we update the site)
+- Headless section: drop the `--hl-*` copies of the deleted variables (pads, lift, label booleans, widths, section-pad-bottom). Keep the cqi rule + ratios, centre the D, and use `section/padding-y` for the bottom padding (0 below 768).
 - Code-snippet-preview tabs: Figma (2614:18656) replaced the custom pills with Button instances, Light on Deep. Selected tab = Primary, others = Secondary, no arrow. Use `Button.astro` for the tabs (keep the ARIA tablist behaviour).
 - Primitives were renamed and renumbered in Figma; update `primitives.css` and `theme.css` to match:
   - `Brown/*` → `Brown Deep/*` and `Yellow/*` → `Yellow Light/*`.
