@@ -127,12 +127,6 @@ const {
   .hero__buttons { display: flex; flex-wrap: wrap; gap: var(--space-2xs); }
   .hero__logos { width: 100%; padding-bottom: var(--space-md); }
 
-  /* 393 frame: the page instance adds section/padding-y above the wrapper and between wrapper
-     and logos (instance override in Figma – see docs/AMBIGUITIES.md). */
-  @media (max-width: 767px) {
-    .hero { padding-top: var(--section-padding-y); gap: var(--section-padding-y); }
-  }
-
   /* Intro: buttons hidden until the typewriter reveals them (opacity 0 → 1, 150ms) */
   .hero__buttons { transition: opacity 150ms linear; }
   .hero--intro .hero__buttons { opacity: 0; }
@@ -147,20 +141,20 @@ const {
    * 0.00s  final size reserved, only the cursor "•" visible, buttons hidden, marquee running
    * 0.75s  cursor blinks like an eye: • → ~ → - → ᴗ → • (75ms per glyph, 0.3s)
    * 1.15s  types the headline (text/primary) at ~80 chars/s
-   *        pause 0.5s, then types the subheadline (text/muted, cursor turns muted)
+   *        pause 0.5s, then a typed line break and the subheadline (text/muted, cursor turns muted) –
+ *        the subheadline always starts on its own line, at every breakpoint
    * +0.15s cursor duplicates "••", then "[" and "]" typed around → "[••]" (~50ms each)
    * +0.3s  wink "[-•]" for 100ms → "[••]"
-   * +0.15s CTA buttons fade in (150ms). Final state = static design.
+   * +0.15s CTA buttons fade in (150ms). Final state = static design, ending on "[••]".
    */
   async function play(section: HTMLElement) {
     const h1 = section.querySelector<HTMLElement>('.tw');
     if (!h1) return;
     const headline = h1.querySelector('.hero__headline-main')?.textContent?.trim() ?? '';
     const sub = h1.querySelector('.hero__headline-sub')?.textContent?.trim() ?? '';
-    // The static subheadline ends in a face "[•ᴥ•]"; the face is drawn by the cursor, not typed.
+    // The static subheadline ends in the face "[••]"; the face is drawn by the cursor, not typed.
     const faceMatch = sub.match(/\s*(\[[^\]]+\])\s*$/);
     const subText = faceMatch ? sub.slice(0, faceMatch.index) + ' ' : sub;
-    const finalFace = faceMatch ? faceMatch[1] : '[••]';
 
     const typer = new Typer(h1).start();
     typer.run('hero__anim-main');
@@ -176,9 +170,8 @@ const {
     await typer.cursorFrames(['••', '[••', '[••]'], 50);
     await sleep(300);
     await typer.cursorFrames(['[-•]'], 100);
-    typer.setCursor('[••]');
+    typer.setCursor('[••]'); // final face, same as the static design
     await sleep(150);
-    typer.setCursor(finalFace);
     section.classList.add('hero--revealed');
     await sleep(150);
     typer.finish();

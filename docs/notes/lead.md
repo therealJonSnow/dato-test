@@ -27,7 +27,7 @@
 - **The 393 page instance overrides the hero**: root `paddingTop` and `itemSpacing` are bound to `section/padding-y` only on the 393 instance (0 on all other frames). The description says "no size variants", so this override is undocumented. Implemented as a `<768px` rule.
 - **Copy in the description doesn't match the instance:** the description says the secondary button is "Docs" with the arrow off; the homepage instance says "Explore Pricing". The instance was used.
 - **Typed line break:** the description says "On ≥1152 the subheadline starts on a new line (typed line break)", but the static design shows the subheadline on its own line at every width (768 and 393 too: headline and subheadline are two separate text layers). Code always breaks the line so the animation's final state matches the static design.
-- **Final face mismatch:** the timeline ends on "[••]" (after the wink), but the static design / final state ends with "[•ᴥ•]". Implemented: the cursor face plays the described sequence and then settles on "[•ᴥ•]" when the buttons fade in.
+- *(Resolved 2026-10-14: the design now ends on "[••]" and the code ends there too.)* **Final face mismatch:** the timeline ends on "[••]" (after the wink), but the static design / final state ends with "[•ᴥ•]". Implemented: the cursor face plays the described sequence and then settles on "[•ᴥ•]" when the buttons fade in.
 - **"Bring Your Own AI." as h1:** good, explicit. The label "small eyebrow line" has no style specified; `Oracle/Subtitle Medium` + `text/muted` was assumed.
 - The **logo strip at 393** shows the same 40px-high logos; there's no rule on whether logo size should scale. Kept at 40px.
 

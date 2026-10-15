@@ -1,12 +1,12 @@
 ---
 /**
  * Figma: TEST/headless-cms-lockup (2982:14064) — [label] [D] [list].
- * - Sizes come from the component-specific test/headless-* Sizing variables, implemented as scoped
- *   custom properties in HeadlessCmsSection.astro (--hl-*). Display size and the D are
- *   container-relative (cqi of the section's content column): text 7.3cqi (mobile 9.855cqi),
- *   D 5.3cqi (mobile 7.2cqi).
- * - Label: "Single Source" ≥768, "Source" below (show-full-label / show-short-label).
- * - Label and list share the free space equally, so the D stays centred.
+ * - Container-driven: one input, --hl-display-size (set by the section: 7.3cqi, 9.855cqi <768).
+ *   Everything else is a fixed ratio of it (from the Figma lockup description):
+ *   D = 0.733×, gaps label/D/list = 0.6×, list item gap = 0.111×, list offset after the D = 0.067×.
+ *   Figma's "Component sizing" headless/* variables are a preview aid only – not used here.
+ * - Label: "Single Source" ≥768, "Source" below (Full label / Short label properties in Figma).
+ * - Label and list share the free space equally, so the D is always exactly centred.
  * - List: the active item is centred at full opacity, the others at 30%. Static state = Chatbot.
  * - MOTION: the list moves with a CSS transform, one item per step (script in the section).
  *   The cycle is rendered three times so the loop can jump back by one cycle invisibly.
@@ -49,8 +49,7 @@ const rendered = Array.from({ length: copies }, () => items).flat();
     inset: 0;
     display: flex;
     align-items: center;
-    gap: var(--hl-lockup-gap);
-    padding: var(--hl-lockup-pad-top) var(--hl-lockup-pad-right) var(--hl-lockup-pad-bottom) var(--hl-lockup-pad-left);
+    gap: calc(var(--hl-display-size) * 0.6);
     color: var(--text-on-inverse);
     font-family: var(--font-sans);
     font-weight: 500;
@@ -67,15 +66,19 @@ const rendered = Array.from({ length: copies }, () => items).flat();
     white-space: nowrap;
     text-align: right;
   }
-  .lockup__label-full { display: var(--hl-show-full-label); }
-  .lockup__label-short { display: var(--hl-show-short-label); }
+  .lockup__label-full { display: none; }
+  .lockup__label-short { display: inline; }
+  @media (min-width: 768px) {
+    .lockup__label-full { display: inline; }
+    .lockup__label-short { display: none; }
+  }
 
-  .lockup__symbol-wrap { flex: none; padding-bottom: var(--hl-symbol-lift); }
+  .lockup__symbol-wrap { flex: none; }
   .lockup__symbol {
     display: block;
-    width: var(--hl-symbol-size);
+    width: calc(var(--hl-display-size) * 0.733);
     height: auto;
-    aspect-ratio: 61.97 / 62.37;
+    aspect-ratio: 1; /* square in Figma (symbol-height removed) */
   }
 
   .lockup__list-wrap {
@@ -85,14 +88,14 @@ const rendered = Array.from({ length: copies }, () => items).flat();
     position: relative;
   }
   .lockup__list {
-    --step: calc(1em + var(--hl-list-gap));
+    --step: 1.111em; /* item height (1em) + gap 0.111em */
     position: absolute;
     left: 0;
     top: 50%;
     display: flex;
     flex-direction: column;
-    gap: var(--hl-list-gap);
-    padding-left: var(--hl-list-offset);
+    gap: 0.111em;
+    padding-left: 0.067em;
     font-size: var(--hl-display-size);
     letter-spacing: -0.05em;
     white-space: nowrap;

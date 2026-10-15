@@ -5,13 +5,17 @@
  * TEST/headless-cms-lockup (2982:14064) → src/components/headless/HeadlessLockup.astro.
  *
  * - Background surface/inverse, text text/on-inverse; paragraph at 70% opacity.
- * - ≥768 (Breakpoint=768+): content column max 1160, height test/headless-visual-height;
+ * - ≥768 (Breakpoint=768+): content column max 1160, visual height container-driven (below);
  *   headline (type/H2) top-left, paragraph (type/Body) bottom-left, lockup centred behind them.
  * - <768 (Breakpoint=<768): headline (type/H1 size in Figma) + paragraph stacked (gap space/2xs),
  *   gap space/md, then the visual strip: runs to the section edges, fixed height
- *   (visual-height 250), anchored to the bottom (section padding-bottom 0).
- * - test/headless-* Sizing variables are scoped custom properties below (--hl-*), one block per
- *   Sizing mode (393 base / 768 / 1152 / 1320+). Display + D size are container-relative (cqi).
+ *   (75% of the column width = 250 at 393), anchored to the bottom (section padding-bottom 0).
+ *   ≥768 bottom padding = section/padding-y.
+ * - Headline max width 361 (319 <768), paragraph max width 345 (281 <768) – from the variants.
+ * - SIZING IS CONTAINER-DRIVEN. Figma's "Component sizing" collection (headless/*) is a preview aid
+ *   only and is deliberately NOT copied here. The one rule: display size = 7.3cqi of the content
+ *   column (9.855cqi below 768); the lockup derives everything else from it (HeadlessLockup.astro).
+ *   Visual height ≥768 = 0.5137 × column width + 36px (max 632) – a straight-line fit of the Figma frames.
  * - The list overflows above/below the content column and is clipped by the section.
  * - MOTION from headless-cms-section-animation (1499:47138, page "Responsive (source of truth)"):
  *   hold 0.8s, then the list moves up one row with a CSS transform — 416ms, Figma "Slow" spring
@@ -53,79 +57,23 @@ const {
 </section>
 
 <style>
-  /* Sizing collection: test/headless-* (mode 393 = base) */
+  /* Container-driven sizing (see header). Mobile-first. */
   .hl {
-    --hl-display-size: 9.855cqi;      /* 32.817 @ 333 content width */
-    --hl-symbol-size: 7.2cqi;         /* 24.07 */
-    --hl-visual-height: 250px;
-    --hl-lockup-gap: 19.69px;
-    --hl-list-offset: 2.19px;
-    --hl-list-gap: 3.64px;
-    --hl-lockup-pad-left: 0px;
-    --hl-lockup-pad-right: 50.39px;
-    --hl-lockup-pad-top: 8.12px;
-    --hl-lockup-pad-bottom: 0px;
-    --hl-headline-width: 319px;
-    --hl-paragraph-width: 281px;
-    --hl-section-pad-bottom: 0px;
-    --hl-symbol-lift: 1px;
-    --hl-show-full-label: none;
-    --hl-show-short-label: inline;
+    --hl-display-size: 9.855cqi;  /* of .hl__inner – 32.8px @ 333 */
     /* motion (prototype of headless-cms-section-animation — see header) */
     --hl-move-dur: 416ms;
     --hl-move-ease: linear(0, 0.165 6%, 0.413 12%, 0.612 19%, 0.750 25%, 0.841 31%, 0.899 38%, 0.936 44%, 0.960 50%, 0.975 56%, 0.984 62%, 0.990 69%, 0.994 75%, 0.996 81%, 0.997 88%, 0.998 94%, 1);
 
+    container: hl / inline-size;
     background: var(--surface-inverse);
     color: var(--text-on-inverse);
-    padding: var(--section-padding-y) var(--section-padding-x) var(--hl-section-pad-bottom);
+    padding: var(--section-padding-y) var(--section-padding-x) 0;
     overflow: clip;
   }
   @media (min-width: 768px) {
     .hl {
-      --hl-display-size: 7.3cqi;      /* 84.507 @ 1160, 76.62 @ 1032, 48.559 @ 648 */
-      --hl-symbol-size: 5.3cqi;       /* 61.97 @ 1160 */
-      --hl-visual-height: 369px;
-      --hl-lockup-gap: 29.14px;
-      --hl-list-offset: 3.23px;
-      --hl-list-gap: 5.39px;
-      --hl-lockup-pad-left: 14.45px;
-      --hl-lockup-pad-right: 0px;
-      --hl-lockup-pad-top: 0px;
-      --hl-lockup-pad-bottom: 9.46px;
-      --hl-headline-width: 281px;
-      --hl-paragraph-width: 310px;
-      --hl-section-pad-bottom: 51px;
-      --hl-symbol-lift: 1.54px;
-      --hl-show-full-label: inline;
-      --hl-show-short-label: none;
-    }
-  }
-  @media (min-width: 1152px) {
-    .hl {
-      --hl-visual-height: 571.91px;
-      --hl-lockup-gap: 45.97px;
-      --hl-list-offset: 5.11px;
-      --hl-list-gap: 8.51px;
-      --hl-lockup-pad-left: 14.79px;
-      --hl-lockup-pad-bottom: 4.59px;
-      --hl-headline-width: 361px;
-      --hl-paragraph-width: 332px;
-      --hl-section-pad-bottom: 84.09px;
-      --hl-symbol-lift: 1.68px;
-    }
-  }
-  @media (min-width: 1320px) {
-    .hl {
-      --hl-visual-height: 632.01px;
-      --hl-lockup-gap: 50.7px;
-      --hl-list-offset: 5.64px;
-      --hl-list-gap: 9.39px;
-      --hl-lockup-pad-left: 0px;
-      --hl-lockup-pad-right: 1.79px;
-      --hl-lockup-pad-bottom: 6.09px;
-      --hl-paragraph-width: 345px;
-      --hl-section-pad-bottom: 113.99px;
-      --hl-symbol-lift: 1.88px;
+      --hl-display-size: 7.3cqi;  /* 84.7px @ 1160, 75.3 @ 1032, 47.3 @ 648 */
+      padding-bottom: var(--section-padding-y);
     }
   }
 
@@ -141,20 +89,22 @@ const {
   .hl__text { display: flex; flex-direction: column; gap: var(--space-2xs); }
   /* <768: Figma uses the Oracle/H1 style for the headline */
   .hl__headline {
-    max-width: var(--hl-headline-width);
+    max-width: 319px;
     font: 500 var(--type-h1)/1 var(--font-sans);
     letter-spacing: -0.04em;
   }
-  .hl__paragraph { max-width: var(--hl-paragraph-width); opacity: 0.7; }
+  .hl__paragraph { max-width: 281px; opacity: 0.7; }
   .hl__visual {
     position: relative;
-    height: var(--hl-visual-height);
+    height: min(75cqi, 250px); /* cqi of the section (hl container) */
     margin-inline: calc(-1 * var(--section-padding-x));
     overflow: clip;
   }
 
   @media (min-width: 768px) {
-    .hl__inner { height: var(--hl-visual-height); gap: 0; }
+    .hl__inner { height: min(calc(51.37cqw + 36px), 632px); gap: 0; } /* fits 632 @1160, 566 @1032, 369 @648 */
+    .hl__headline { max-width: 361px; }
+    .hl__paragraph { max-width: 345px; }
     .hl__text { display: contents; }
     .hl__headline,
     .hl__paragraph { position: relative; z-index: 1; }

@@ -115,15 +115,28 @@ These raw values were mapped to theme tokens in code so they re-theme.
 ### Manual steps (blocked for the agent)
 - None open. Note for next time: "ABC Oracle Unlicensed Trial" isn't available to the Plugin API, so an agent can't edit text in this file. Upload the font as a team font to allow it.
 
-### Code follow-ups (when we update the site)
-- Headless section: drop the `--hl-*` copies of the deleted variables (pads, lift, label booleans, widths, section-pad-bottom). Keep the cqi rule + ratios, centre the D, and use `section/padding-y` for the bottom padding (0 below 768).
-- Code-snippet-preview tabs: Figma (2614:18656) replaced the custom pills with Button instances, Light on Deep. Selected tab = Primary, others = Secondary, no arrow. Use `Button.astro` for the tabs (keep the ARIA tablist behaviour).
-- Primitives were renamed and renumbered in Figma; update `primitives.css` and `theme.css` to match:
-  - `Brown/*` → `Brown Deep/*` and `Yellow/*` → `Yellow Light/*`.
-  - Steps are now Deep 5–1 (was 800/750/700/600/500) and Light 5–0 (was 400/350/300/200/100/50), for every family.
-- Tokens: remove `--surface-inverse-fade` and `--surface-default-pressed` from `theme.css`. Button pressed = `color-mix(in srgb, var(--surface-default) 70%, transparent)`, and fades use `var(--surface-inverse)` → transparent.
-- Hero: remove the `<768` padding/gap rule, end the typewriter on "[••]" (it currently switches to "[•ᴥ•]"), and use the new subheadline copy.
-- Footer-cta: add the hover smile ("[••]" → "[•ᴗ•]").
+### Code follow-ups — done 2026-10-15
+- [x] **Primitives:** `primitives.css` / `theme.css` and every component now use `--color-<family>-deep-5…1` / `--color-<family>-light-5…0`, with Brown Deep + Yellow Light for Default.
+- [x] **Tokens:** `--surface-inverse-fade` and `--surface-default-pressed` are removed. Button pressed (deep-on-light, light-on-deep) = `color-mix(in srgb, var(--surface-default) 70%, transparent)`.
+- [x] **Hero:**
+  - The `<768` padding/gap override is removed.
+  - The typewriter ends on "[••]".
+  - The new copy is in: "Thoughtfully built and ambitiously used." / "The AI-agnostic CMS that's human on support and transparent in pricing [••]".
+  - The secondary button is "Docs".
+- [x] **Footer-cta:** smiles on hover and keyboard focus ("[••]" → "[•ᴗ•]"). Both faces share one cell, so the line never moves.
+- [x] **Code-snippet tabs:** built from `Button.astro`, light-on-deep. Selected = Primary, others = Secondary; the variant swaps on selection. The row scrolls sideways where it doesn't fit (393).
+- [x] **Headless section:** all `--hl-*` copies of Figma variables are removed. It's now container-driven:
+  - display size = 7.3cqi (9.855cqi <768);
+  - lockup ratios 0.733 / 0.6 / 0.111 / 0.067;
+  - the D is always centred;
+  - labels switch by media query;
+  - max widths 361/345 (319/281 <768);
+  - bottom padding `section/padding-y` (0 <768);
+  - visual height 75% of the column width <768, and 0.5137 × column + 36px (max 632) ≥768.
+  - Checked: 872 / 489 / 444px tall at 1320 / 768 / 393, matching the Figma frames.
+- [x] **Copy synced from Figma:** "Join Us On Slack"; the dark band now reads "Pricing as it should be:" + muted "Transparent and predictable".
+- [x] **footer-links:** row gap space/xl at 1152, space/2xl from 1320 (as in the new description).
+- ⚠️ **Open in Figma:** the Hero *description* says the secondary button is "Explore Pricing", but the homepage instance now says "Docs". The code follows the instance; one of the two should change.
 
 ## What worked well (keep doing this)
 - Breakpoints as variable modes + "Breakpoint" variants with "in code this is a media query, NOT a prop". This mapped one-to-one to CSS.

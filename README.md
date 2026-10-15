@@ -14,6 +14,7 @@ npm run build
   - `theme.css`: Theme modes. Each section sets `data-theme="orange|green|purple|blue|pink|default"`.
   - `sizing.css`: Sizing modes, as mobile-first media queries at 768 / 1152 / 1320. The 1320, 1920 and 2560 frames share values.
   - `radius.css`: Radius.
+- Figma's "Component sizing" collection (`headless/*`) is a Figma preview aid only and is deliberately not in the code: the headless lockup is container-driven (see `HeadlessCmsSection.astro`).
 - `src/styles/typography.css`: the Figma text styles as `.t-*` classes (ABC Oracle trial fonts in `public/fonts`, DM Mono).
 - `src/components/sections/`: one component per section on the page. Sub-components live in folders per section.
 - `src/components/ui/Button.astro`: the shared button. It takes `appearance` × `variant`, with hover and pressed states from the Theme tokens.

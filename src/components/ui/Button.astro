@@ -9,9 +9,11 @@
  *  light-on-white – accent fill, deep text (white/tint backgrounds).     Hover: deep fill, accent text.
  *  deep-on-light  – deep fill, accent text (accent backgrounds).         Hover: near-white fill, deep text.
  *  light-on-deep  – accent fill, deep text (dark backgrounds).           Hover: near-white fill, deep text.
+ * Figma now models Leading as two toggles (Userpic, Logos) instead of a variant; `leading` maps to them.
  * variant = primary (solid) | secondary (soft, tinted). Figma calls these Primary/Secondary,
  * the description calls them solid/soft – same thing.
- * States: default, :hover, :active (pressed), disabled.
+ * States: default, :hover, :active (pressed), disabled. Pressed on deep-on-light / light-on-deep
+ * = surface/default at 70% (Figma sets the 70% as fill opacity; there is no pressed token).
  */
 type Appearance = 'deep-on-white' | 'light-on-white' | 'deep-on-light' | 'light-on-deep';
 interface Props {
@@ -87,11 +89,11 @@ const Tag = href && !disabled ? 'a' : 'button';
 
   .btn--deep-on-light.btn--primary { --btn-bg: var(--surface-inverse); --btn-fg: var(--text-on-inverse); }
   .btn--deep-on-light.btn--secondary { --btn-bg: var(--surface-subtle); --btn-fg: var(--text-primary); }
-  .btn--deep-on-light { --btn-bg-hover: var(--surface-default); --btn-fg-hover: var(--text-primary); --btn-bg-pressed: var(--surface-default-pressed); }
+  .btn--deep-on-light { --btn-bg-hover: var(--surface-default); --btn-fg-hover: var(--text-primary); --btn-bg-pressed: color-mix(in srgb, var(--surface-default) 70%, transparent); }
 
   .btn--light-on-deep.btn--primary { --btn-bg: var(--surface-accent); --btn-fg: var(--text-primary); }
   .btn--light-on-deep.btn--secondary { --btn-bg: var(--surface-accent-subtle); --btn-fg: var(--text-on-inverse); }
-  .btn--light-on-deep { --btn-bg-hover: var(--surface-default); --btn-fg-hover: var(--text-primary); --btn-bg-pressed: var(--surface-default-pressed); }
+  .btn--light-on-deep { --btn-bg-hover: var(--surface-default); --btn-fg-hover: var(--text-primary); --btn-bg-pressed: color-mix(in srgb, var(--surface-default) 70%, transparent); }
 
   @media (hover: hover) {
     .btn:hover { background: var(--btn-bg-hover); color: var(--btn-fg-hover); }

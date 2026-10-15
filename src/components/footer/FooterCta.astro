@@ -6,13 +6,23 @@
  *   (the full-width surface/inverse band is footer-cta-band in FooterAnimationSection).
  * - Hover (and keyboard focus): the "→" in front of the text appears (opacity 0 → 1).
  *   Prototype transition is "none" → instant. The arrow always takes its space, so nothing moves.
+ * - Hover also makes the face smile: "[••]" → "[•ᴗ•]" (Footer-cta description). Both faces share one
+ *   grid cell, so the line never changes width. No hover on touch (Default only).
  */
-interface Props { text: string; href: string }
-const { text, href } = Astro.props;
+interface Props { text: string; href: string; hoverFace?: string }
+const { text, href, hoverFace = '[•ᴗ•]' } = Astro.props;
+const m = text.match(/^(.*?)(\[[^\]]+\])\s*$/);
+const body = m ? m[1] : text;
+const face = m ? m[2] : '';
 ---
 <a class="footer-cta t-h1" href={href}>
   <span class="footer-cta__arrow" aria-hidden="true">→</span>
-  <span class="footer-cta__text">{text}</span>
+  <span class="footer-cta__text">{body}{face && (
+    <span class="footer-cta__face">
+      <span class="footer-cta__face-default">{face}</span>
+      <span class="footer-cta__face-hover" aria-hidden="true">{hoverFace}</span>
+    </span>
+  )}</span>
 </a>
 
 <style>
@@ -30,7 +40,16 @@ const { text, href } = Astro.props;
     white-space: nowrap; /* Figma: single line at every width */
   }
   .footer-cta__arrow { opacity: 0; flex-shrink: 0; }
-  .footer-cta:hover .footer-cta__arrow,
+  .footer-cta__face { display: inline-grid; justify-items: end; }
+  .footer-cta__face > * { grid-area: 1 / 1; }
+  .footer-cta__face-hover { visibility: hidden; }
   .footer-cta:focus-visible .footer-cta__arrow { opacity: 1; }
+  .footer-cta:focus-visible .footer-cta__face-default { visibility: hidden; }
+  .footer-cta:focus-visible .footer-cta__face-hover { visibility: visible; }
+  @media (hover: hover) {
+    .footer-cta:hover .footer-cta__arrow { opacity: 1; }
+    .footer-cta:hover .footer-cta__face-default { visibility: hidden; }
+    .footer-cta:hover .footer-cta__face-hover { visibility: visible; }
+  }
   .footer-cta:focus-visible { outline: 2px solid var(--border-on-inverse-strong); outline-offset: -4px; }
 </style>

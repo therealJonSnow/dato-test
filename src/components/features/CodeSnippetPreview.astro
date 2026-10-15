@@ -6,12 +6,15 @@
  * - Card: surface/inverse fill, radius/lg, 580 tall, max 500 wide, clips its content.
  * - Size=1320 (≥768): 30px padding, 20px between tabs and code, 20px between line numbers and code.
  *   Size=393 (<768): 20px padding, 4px between tabs, 20px tab→code, 10px numbers→code. Tab text = Subtitle (size follows Sizing).
- * - Selector = real tabs (role=tablist, arrow keys / Home / End). Active pill: surface/accent-subtle
- *   fill + text/on-inverse; inactive: text/on-inverse-soft.
+ * - Selector = real tabs (role=tablist, arrow keys / Home / End) built from the Button component,
+ *   Appearance light-on-deep (as in Figma): selected tab = Primary, the others = Secondary, no arrow.
+ *   The row scrolls sideways if it doesn't fit (393: four buttons are wider than the card).
  * - Code = real text in Mono/Code Small. Colours: base text/on-inverse-soft, identifiers [[x]]
  *   text/on-inverse-strong, GraphQL fields / comments <<x>> text/on-inverse.
  *   Line numbers are a separate aria-hidden column. Long lines scroll horizontally (393 clips in Figma).
  */
+import Button from '../ui/Button.astro';
+
 export interface Snippet {
   label: string;
   /** Source; mark identifiers with [[x]] and highlighted tokens with <<x>> */
@@ -43,15 +46,16 @@ const panels = snippets.map((s) => s.code.replace(/^\n|\n$/g, '').split('\n').ma
 <div class="csp" data-csp>
   <div class="csp__tabs" role="tablist" aria-label={label}>
     {snippets.map((s, i) => (
-      <button
-        type="button"
+      <Button
+        appearance="light-on-deep"
+        variant={i === 0 ? 'primary' : 'secondary'}
+        class="csp__tab"
         role="tab"
-        class="csp__tab t-subtitle"
         id={`${id}-tab-${i}`}
         aria-selected={i === 0 ? 'true' : 'false'}
         aria-controls={`${id}-panel-${i}`}
         tabindex={i === 0 ? 0 : -1}
-      >{s.label}</button>
+      >{s.label}</Button>
     ))}
   </div>
   {panels.map((lines, i) => (
@@ -83,21 +87,16 @@ const panels = snippets.map((s) => s.code.replace(/^\n|\n$/g, '').split('\n').ma
     .csp { --csp-pad: var(--space-lg); --csp-num-gap: var(--space-md); }
   }
 
-  .csp__tabs { display: flex; gap: var(--space-3xs); align-items: center; }
-  @media (min-width: 768px) { .csp__tabs { gap: var(--space-xs); } }
-  .csp__tab {
-    padding: var(--space-xs) var(--space-sm);
-    border-radius: var(--radius-full);
-    color: var(--text-on-inverse-soft);
-    white-space: nowrap;
+  .csp__tabs {
+    display: flex;
+    gap: var(--space-3xs);
+    align-items: center;
+    overflow-x: auto;
+    scrollbar-width: none;
     flex-shrink: 0;
-    transition: background-color 150ms ease-in-out, color 150ms ease-in-out;
   }
-  @media (hover: hover) {
-    .csp__tab:hover { color: var(--text-on-inverse); }
-  }
-  .csp__tab[aria-selected='true'] { background: var(--surface-accent-subtle); color: var(--text-on-inverse); }
-  .csp__tab:focus-visible { outline: 2px solid var(--text-on-inverse); outline-offset: 2px; }
+  .csp__tabs::-webkit-scrollbar { display: none; }
+  @media (min-width: 768px) { .csp__tabs { gap: var(--space-xs); } }
 
   .csp__panel { display: flex; gap: var(--csp-num-gap); min-width: 0; }
   .csp__panel[hidden] { display: none; }
@@ -116,9 +115,6 @@ const panels = snippets.map((s) => s.code.replace(/^\n|\n$/g, '').split('\n').ma
   .csp__id { color: var(--text-on-inverse-strong); }
   .csp__kw { color: var(--text-on-inverse); }
 
-  @media (prefers-reduced-motion: reduce) {
-    .csp__tab { transition: none; }
-  }
 </style>
 
 <script>
@@ -129,10 +125,14 @@ const panels = snippets.map((s) => s.code.replace(/^\n|\n$/g, '').split('\n').ma
         const on = i === j;
         t.setAttribute('aria-selected', String(on));
         t.tabIndex = on ? 0 : -1;
+        // Button variant swap: selected = Primary, others = Secondary (classes from Button.astro)
+        t.classList.toggle('btn--primary', on);
+        t.classList.toggle('btn--secondary', !on);
         const panel = root.querySelector<HTMLElement>(`#${t.getAttribute('aria-controls')}`);
         if (panel) panel.hidden = !on;
       });
       if (focus) tabs[i].focus();
+      tabs[i].scrollIntoView({ block: 'nearest', inline: 'nearest' });
     };
     tabs.forEach((t, i) => {
       t.addEventListener('click', () => select(i));

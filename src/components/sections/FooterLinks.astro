@@ -6,7 +6,7 @@
  * - surface/inverse background; padding space/2xl top/bottom at every size,
  *   section/padding-x sides; content max 1160 centred.
  * - Six columns: ≥1152 one row, columns content-sized and spread (space-between);
- *   768: 3-column grid; 393: 2-column grid; grid gaps space/2xl.
+ *   768: 3-column grid; 393: 2-column grid; grid gaps space/2xl. Row gap ≥1320 space/2xl, 1152 space/xl.
  * - Group heading: Oracle/Subtitle Regular, text/on-inverse-soft. Links: Oracle/Subtitle Medium,
  *   text/on-inverse. Lines 4px apart (space/3xs), groups in a column space/lg apart.
  * - Status group uses the Green primitives (heading Green Light/300, link + 8px dot Green Light/400, 10px gap)
@@ -121,8 +121,8 @@ const { columns = defaultColumns, theme = 'purple' } = Astro.props;
   .footer-links__link:focus-visible { text-decoration: underline; text-decoration-thickness: from-font; }
   .footer-links__link:focus-visible { outline: 2px solid var(--border-on-inverse-strong); outline-offset: 2px; }
 
-  .footer-links__group--status .footer-links__heading { color: var(--color-green-light-300); }
-  .footer-links__group--status .footer-links__link { color: var(--color-green-light-400); }
+  .footer-links__group--status .footer-links__heading { color: var(--color-green-light-3); }
+  .footer-links__group--status .footer-links__link { color: var(--color-green-light-5); }
   .footer-links__dot {
     width: 8px;
     height: 8px;
@@ -138,7 +138,10 @@ const { columns = defaultColumns, theme = 'purple' } = Astro.props;
     .footer-links__grid {
       display: flex;
       justify-content: space-between;
-      gap: var(--space-2xl);
+      gap: var(--space-xl); /* Size=1152 variant: space/xl */
     }
+  }
+  @media (min-width: 1320px) {
+    .footer-links__grid { gap: var(--space-2xl); }
   }
 </style>
