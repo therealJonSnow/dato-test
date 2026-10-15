@@ -59,9 +59,5 @@ const blocks = BLOCKS[feature].map(([x, y, w, h]) =>
     border-radius: var(--radius-md);
     background-color: var(--surface-default);
     opacity: 0.3;
-    transition: background-color 300ms ease-in-out;
-  }
-  @media (prefers-reduced-motion: reduce) {
-    .feature-visual__block { transition: none; }
   }
 </style>

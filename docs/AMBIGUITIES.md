@@ -135,6 +135,7 @@ These raw values were mapped to theme tokens in code so they re-theme.
   - visual height 75% of the column width <768, and 0.5137 × column + 36px (max 632) ≥768.
   - Checked: 872 / 489 / 444px tall at 1320 / 768 / 393, matching the Figma frames.
 - [x] **Copy synced from Figma:** "Join Us On Slack"; the dark band now reads "Pricing as it should be:" + muted "Transparent and predictable".
+- [x] **features-multi-section:** the description (3007:14711) now says switching is instant (no fade or crossfade) at every width. All 300ms theme, image and description transitions are removed from FeaturesMultiSection, FeatureRow and FeatureVisual.
 - [x] **footer-links:** row gap space/xl at 1152, space/2xl from 1320 (as in the new description).
 - ⚠️ **Open in Figma:** the Hero *description* says the secondary button is "Explore Pricing", but the homepage instance now says "Docs". The code follows the instance; one of the two should change.
 

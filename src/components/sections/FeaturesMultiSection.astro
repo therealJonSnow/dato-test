@@ -12,8 +12,8 @@
  *   content max 500 hugging the centre seam, seam padding = section/padding-x.
  *   768–1151: image on top (max 345 wide), features below. <768: same, image max 207 wide.
  * - Theme per feature: each feature carries a theme; the section's data-theme is the active
- *   feature's theme (1 Green, 2 Default, 3 Purple, 4 Orange, 5 Blue). Colours crossfade
- *   300ms ease-in-out (background/color/border); instant with prefers-reduced-motion.
+ *   feature's theme (1 Green, 2 Default, 3 Purple, 4 Orange, 5 Blue). Switching is INSTANT at every
+ *   width – theme colours, image and description change in a single frame (no fade/crossfade).
  * - ≥1152 (hover-capable pointer): hovering a row — or the same vertical zone on the image —
  *   activates it; the last one stays active when the pointer leaves. Focus/click also activates.
  * - <1152: the image block is sticky (top 0) and the list scrolls below it. Card max-height
@@ -103,19 +103,17 @@ const {
   .fms__features,
   .fms__media {
     padding: var(--section-padding-y) var(--section-padding-x);
-    transition: background-color 300ms ease-in-out;
   }
   .fms__features { background-color: var(--surface-inverse); }
   .fms__media { background-color: var(--surface-accent); }
 
   .fms__list-wrap { display: flex; flex-direction: column; align-items: flex-start; gap: var(--space-md); }
   .fms__list { width: 100%; display: flex; flex-direction: column; gap: var(--space-md); }
-  .fms__list-wrap :global(.fms__cta) { transition: background-color 300ms ease-in-out, color 300ms ease-in-out; }
 
   /* ---- visuals: stacked, only the active one shows ---- */
   .fms__visuals { display: grid; margin-inline: auto; }
-  .fms__visuals > :global(.feature-visual) { grid-area: 1 / 1; opacity: 0; visibility: hidden; }
-  .fms__visuals > :global(.feature-visual.is-active) { opacity: 1; visibility: visible; }
+  .fms__visuals > :global(.feature-visual) { grid-area: 1 / 1; visibility: hidden; }
+  .fms__visuals > :global(.feature-visual.is-active) { visibility: visible; }
 
   /* ---- below 1152: image on top, sticky ---- */
   @media (max-width: 1151.98px) {
@@ -142,13 +140,8 @@ const {
     .fms__media { align-items: flex-start; }
     .fms__list-wrap { width: 100%; max-width: 500px; }
     .fms__visuals { width: 100%; max-width: 500px; margin-inline: 0; }
-    .fms__visuals > :global(.feature-visual) { transition: opacity 300ms ease-in-out, visibility 300ms; }
   }
 
-  @media (prefers-reduced-motion: reduce) {
-    .fms__features, .fms__media, .fms__list-wrap :global(.fms__cta),
-    .fms__visuals > :global(.feature-visual) { transition: none !important; }
-  }
 </style>
 
 <script>
